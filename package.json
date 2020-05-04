@@ -1,0 +1,25 @@
+{
+    "name": "spbd-project",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "ts-node src/index.ts"
+    },
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/inquirer": "^6.5.0",
+        "@types/node": "^13.13.4",
+        "@types/pg": "^7.14.3",
+        "enquirer": "^2.3.5",
+        "ts-node": "^8.10.1",
+        "tsc": "^1.20150623.0",
+        "typescript": "^3.8.3"
+    },
+    "dependencies": {
+        "inquirer": "^7.1.0",
+        "inquirer-autocomplete-prompt": "^1.0.2",
+        "pg": "^8.0.3"
+    }
+}
