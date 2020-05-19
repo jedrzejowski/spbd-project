@@ -3,4 +3,11 @@ import {selectObject} from "./select/selectObject";
 
 inquirer.registerPrompt("autocomplete", require("inquirer-autocomplete-prompt"));
 
-selectObject().then(point => console.log(point));
+(async () => {
+
+    while (true) {
+        let obj = await selectObject();
+        console.log(obj);
+    }
+
+})();

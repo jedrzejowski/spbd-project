@@ -117,3 +117,8 @@ dist
 
 # Jetbrians
 .idea
+
+*.osm
+*.osm.*
+*.shp.zip
+*.shp

@@ -1,7 +1,5 @@
 import {PlanetOsmPointRow} from "./_planet_osm_point";
 import {PlanetOsmTypedRow} from "./_planet_osm";
-import inquirer, {ChoiceOptions} from "inquirer";
-import {queryDatabase} from "../database";
 import {selectRow} from "../lib/selectRow";
 
 // https://wiki.openstreetmap.org/wiki/Tag:highway%3Dbus_stop
