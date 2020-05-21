@@ -1,4 +1,4 @@
-import inquirer from "inquirer";
+import * as inquirer from "inquirer";
 import {selectObject} from "./select/selectObject";
 
 inquirer.registerPrompt("autocomplete", require("inquirer-autocomplete-prompt"));

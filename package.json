@@ -4,22 +4,46 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "ts-node src/index.ts"
+        "dev": "ts-node src/index.ts",
+        "dev-build": "webpack --mode development --watch",
+        "dev-start": "/usr/bin/electron ./dist/main.js"
     },
     "author": "",
     "license": "ISC",
     "devDependencies": {
+        "@types/electron": "^1.6.10",
         "@types/inquirer": "^6.5.0",
-        "@types/node": "^13.13.4",
+        "@types/node": "^13.13.9",
         "@types/pg": "^7.14.3",
+        "@types/react": "^16.9.35",
+        "@types/react-dom": "^16.9.8",
+        "electron": "^9.0.0",
         "enquirer": "^2.3.5",
+        "html-webpack-plugin": "^4.3.0",
+        "react": "^16.13.1",
+        "react-dom": "^16.13.1",
+        "ts-loader": "^7.0.4",
         "ts-node": "^8.10.1",
         "tsc": "^1.20150623.0",
-        "typescript": "^3.8.3"
+        "typescript": "^3.8.3",
+        "webpack": "^4.43.0",
+        "webpack-cli": "^3.3.11"
     },
     "dependencies": {
+        "@material-ui/core": "^4.9.14",
+        "@material-ui/icons": "^4.9.1",
+        "@material-ui/lab": "^4.0.0-alpha.53",
+        "@types/react-leaflet": "^2.5.1",
+        "css-loader": "^3.5.3",
+        "file-loader": "^6.0.0",
         "inquirer": "^7.1.0",
         "inquirer-autocomplete-prompt": "^1.0.2",
-        "pg": "^8.0.3"
+        "leaflet": "^1.6.0",
+        "node-sass": "^4.14.1",
+        "pg": "^8.0.3",
+        "react-leaflet": "^2.7.0",
+        "sass-loader": "^8.0.2",
+        "style-loader": "^1.2.1",
+        "webpack-node-externals": "^1.7.2"
     }
 }
