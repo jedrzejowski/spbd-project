@@ -5,5 +5,6 @@ export default function QueryVisualizer() {
 
     return <div>
         <QueryObject/>
+        <QueryObject/>
     </div>
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "./leafletFix"
+import "./leaflet-fix"
 import App from "./App";
 import {CssBaseline} from "@material-ui/core";
 

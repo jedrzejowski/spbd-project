@@ -18,10 +18,10 @@ export default function App() {
         <Grid container classes={{
             root: classes.root
         }}>
-            <Grid item xs={3}>
+            <Grid item xs={6}>
                 <QueryVisualizer/>
             </Grid>
-            <Grid item xs={9}>
+            <Grid item xs={6}>
                 <MyMap/>
             </Grid>
         </Grid>
