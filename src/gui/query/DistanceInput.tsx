@@ -34,16 +34,20 @@ export default function DistanceInput(props: {
     const [distance_operator, setDistanceOperator] = useState<QueryT.DistanceOperator | undefined>(distance?.operator);
 
 
-    function handleChange() {
+    function handleChange(type: QueryT.DistanceType | null, value: number | null, operator: QueryT.DistanceOperator | null) { // gdy było bezargumentowo, to czasem wywoływało handle check przed zmianą wartości, i nie przekazywało parametów wyżej
+        let d_type = type ? type : distance_type;
+        let d_value = value ? value : distance_value;
+        let d_operator = operator ? operator : distance_operator;
+
         if (
-            distance_type != undefined &&
-            distance_value != undefined &&
-            distance_operator != undefined
+            d_type != undefined &&
+            d_value != undefined &&
+            d_operator != undefined
         ) {
             onChange({
-                type: distance_type,
-                value: distance_value,
-                operator: distance_operator
+                type: d_type,
+                value: d_value,
+                operator: d_operator
             });
         }
     }
@@ -58,7 +62,7 @@ export default function DistanceInput(props: {
                 value={distance?.type}
                 onChange={event => {
                     setDistanceType(event.target.value as QueryT.DistanceType)
-                    handleChange();
+                    handleChange(event.target.value as QueryT.DistanceType, null, null);
                 }}
             >
                 <MenuItem value="straight_line">Linia prosta [m]</MenuItem>
@@ -71,7 +75,7 @@ export default function DistanceInput(props: {
 
         <TextField
             className={classes.input}
-            label="Wartość odległości"
+            label="Wartość dystansu"
             type="number"
             variant="outlined"
             margin="dense"
@@ -79,7 +83,7 @@ export default function DistanceInput(props: {
             onChange={event => {
                 let num = parseFloat(event.target.value);
                 setDistanceValue(Number.isNaN(num) ? undefined : num);
-                handleChange();
+                handleChange(null, Number.isNaN(num) ? null: num, null);
             }}
         />
 
@@ -93,7 +97,7 @@ export default function DistanceInput(props: {
                 value={distance?.operator}
                 onChange={event => {
                     setDistanceOperator(event.target.value as QueryT.DistanceOperator)
-                    handleChange();
+                    handleChange(null, null, event.target.value as QueryT.DistanceOperator);
                 }}
             >
                 <MenuItem value="less_than">Mniej niż</MenuItem>

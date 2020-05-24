@@ -122,3 +122,6 @@ dist
 *.osm.*
 *.shp.zip
 *.shp
+/package.json
+/package-lock.json
+/src/database.ts

@@ -7,7 +7,7 @@ namespace QueryT {
     export interface Distance {
         operator: DistanceOperator
         value: number
-        type: DistanceType
+        type?: DistanceType
     }
 
     export type KnownObjectTypes = "lat_long" | "tree" | "hotel";
