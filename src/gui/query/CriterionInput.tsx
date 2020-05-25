@@ -5,6 +5,7 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import KnownObjectTypeInput from "../input/KnownObjectTypeInput";
 import DistanceInput from "../input/DistanceInput";
 import SearchOsmRow from "../input/SearchOsmRow";
+import useAppDispatch from "../hooks/useAppDispatch";
 
 const useClasses = makeStyles(theme => ({
     input_root: {
@@ -13,20 +14,24 @@ const useClasses = makeStyles(theme => ({
     }
 }), {name: "DestinationObject"});
 
-export default function DestinationObject(props: {
-    onChange?: (criterion: QueryT.CriterionAny | null) => void,
-    onDistanceChange?: (distance: QueryT.Distance | null) => void,
-    onObjectTypeChange?: (object_type: QueryT.KnownObjectTypes | null) => void
+export default function CriterionInput(props: {
+    id: string
 }) {
+    const criterion_id = props.id;
     const classes = useClasses();
+    const dispatch = useAppDispatch();
     const [object_type, setObjectType] = useState<QueryT.KnownObjectTypes | null>(null);
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const [distance, setDistance] = useState<QueryT.Distance | null>();
 
-    function emitChange() {
+    function emitChange(criterion: QueryT.CriterionAny | null) {
+        dispatch("CRITERION_SET", {criterion_id, criterion});
+    }
+
+    function emitRightChange() {
         if (distance == null || object_type == null) {
-            props.onChange?.(null);
+            emitChange(null);
             return;
         }
 
@@ -38,9 +43,9 @@ export default function DestinationObject(props: {
                     lat: latitude,
                     lng: longitude,
                 };
-                props.onChange?.(criterion);
+                emitChange(criterion);
             } else {
-                props.onChange?.(null);
+                emitChange(null);
             }
         } else {
             // let criterion: QueryT.CriterionPoint = {
@@ -49,20 +54,18 @@ export default function DestinationObject(props: {
             //     lat: latitude,
             //     lng: longitude,
             // };
-            props.onChange?.(null);
+            emitChange(null);
         }
     }
 
     function handleDistanceChange(distance: QueryT.Distance | null) {
         setDistance(distance);
-        props.onDistanceChange?.(distance);
-        emitChange();
+        emitRightChange();
     }
 
     function handleObjectTypeChange(object_type: QueryT.KnownObjectTypes | null) {
         setObjectType(object_type);
-        props.onObjectTypeChange?.(object_type);
-        emitChange();
+        emitRightChange();
     }
 
     const display_rowsearch = object_type !== null && object_type != "lat_lng";
@@ -84,7 +87,7 @@ export default function DestinationObject(props: {
                 type="number"
                 variant="outlined"
                 margin="dense"
-                value={longitude}
+                value={longitude ?? ""}
                 onChange={event => {
                     const num = parseFloat(event.target.value);
                     setLongitude(Number.isNaN(num) ? null : num);
@@ -98,7 +101,7 @@ export default function DestinationObject(props: {
                 type="number"
                 variant="outlined"
                 margin="dense"
-                value={latitude}
+                value={latitude ?? ""}
                 onChange={event => {
                     const num = parseFloat(event.target.value);
                     setLatitude(Number.isNaN(num) ? null : num);

@@ -17,6 +17,8 @@
         "@types/pg": "^7.14.3",
         "@types/react": "^16.9.35",
         "@types/react-dom": "^16.9.8",
+        "@types/react-redux": "^7.1.9",
+        "@types/uuid": "^8.0.0",
         "electron": "^9.0.0",
         "enquirer": "^2.3.5",
         "html-webpack-plugin": "^4.3.0",
@@ -42,8 +44,11 @@
         "node-sass": "^4.14.1",
         "pg": "^8.2.1",
         "react-leaflet": "^2.7.0",
+        "react-redux": "^7.2.0",
+        "redux": "^4.0.5",
         "sass-loader": "^8.0.2",
         "style-loader": "^1.2.1",
+        "uuid": "^8.1.0",
         "webpack-node-externals": "^1.7.2"
     }
 }

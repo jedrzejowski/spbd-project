@@ -1,12 +1,15 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import QueryT from "../../types/QueryT";
-import DestinationObject from "./DestinationObject";
+import CriterionInput from "./CriterionInput";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardActions from "@material-ui/core/CardActions";
 import Button from "@material-ui/core/Button";
 import CardHeader from "@material-ui/core/CardHeader";
+import Dictionary from "../../types/Dictionary";
+import useAppSelector from "../hooks/useAppSelector";
+import useAppDispatch from "../hooks/useAppDispatch";
 
 const useClasses = makeStyles(theme => ({
     title_root: {
@@ -30,50 +33,37 @@ const useClasses = makeStyles(theme => ({
     }
 }), {name: "CriterionObjects"});
 
-export default function CriterionObjects(props: {
-    onChange?: (criterions: (QueryT.CriterionAny | null)[]) => void
-}) {
-    const {onChange} = props;
+
+let dynamic_id = 0;
+
+export default function CriterionObjects() {
     const classes = useClasses();
+    const dispatch = useAppDispatch();
+    const criterions = useAppSelector(state => state.criterions);
 
-    const [criterions, setCriterions_] = useState<(QueryT.CriterionAny | null)[]>([]);
-
-    function setCriterions(distances: (QueryT.CriterionAny | null)[]) {
-        setCriterions_(distances);
-        onChange?.(distances.filter(distance => distance !== null) as QueryT.CriterionAny[]);
-    }
+    useEffect(() => {
+        // onChange?.(criterions);
+    }, [criterions]);
 
     function handleAddCriterion() {
-        setCriterions([
-            ...criterions,
-            null,
-        ]);
+        dispatch("CRITERION_SET", {criterion_id: (++dynamic_id) + "", criterion: null});
     }
 
-    function handleChangeCriterion(index: number, distance: QueryT.CriterionAny | null) {
-        setCriterions(
-            criterions.map((d, i) => {
-                return i === index ? distance : d;
-            })
-        )
-    }
-
-    function handleDeleteCriterion(index: number) {
-        setCriterions(
-            criterions.filter((d, i) => i !== index)
-        )
+    function handleDeleteCriterion(criterion_id: string) {
+        dispatch("CRITERION_DELETE", {criterion_id});
     }
 
     return <>
         <div className={classes.criterions_root}>
-            {criterions.map((distance, i) => {
-                return <Card key={i}>
-                    <CardHeader title={`Kryterium #${i + 1}`}/>
+            {Object.keys(criterions).map((criterion_id, index) => {
+
+                return <Card key={criterion_id}>
+                    <CardHeader title={`Kryterium #${index + 1}`}/>
                     <CardContent>
-                        <DestinationObject onChange={criterion => handleChangeCriterion(i, criterion)}/>
+                        <CriterionInput id={criterion_id}/>
                     </CardContent>
                     <CardActions>
-                        <Button size="small" color="primary" onClick={event => handleDeleteCriterion(i)}>
+                        <Button size="small" color="primary" onClick={event => handleDeleteCriterion(criterion_id)}>
                             Usuń kryterium
                         </Button>
                     </CardActions>

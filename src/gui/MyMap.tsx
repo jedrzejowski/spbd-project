@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import {Map, Marker, Popup, TileLayer} from "react-leaflet"
+import {Map, Marker, Popup, TileLayer, ZoomControl} from "react-leaflet"
 import {LatLngTuple} from "leaflet";
 
 const positionStart: LatLngTuple = [51.505, 22.09];
@@ -12,15 +12,13 @@ export default function MyMap(props: {
 
     function handleChange(center: LatLngTuple) {
         setCenter(center);
-        //props.onChangeCenter?.(center);
-        if (props.onChangeCenter) {
-            props.onChangeCenter(center);
-        }
+        props.onChangeCenter?.(center);
     }
 
     return <Map
         center={positionStart}
         zoom={13}
+        zoomControl={false}
         style={{
             height: "100%",
             width: "100%"
@@ -29,7 +27,9 @@ export default function MyMap(props: {
             const center = event.center;
             if (center)
                 handleChange(center)
-        }}>
+        }}
+    >
+        <ZoomControl position="topright"/>
         <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"

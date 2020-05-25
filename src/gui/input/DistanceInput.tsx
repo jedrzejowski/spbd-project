@@ -40,7 +40,7 @@ export default function DistanceInput(props: {
             <Select
                 labelId="value-type"
                 label="Typ dystansu"
-                value={distance_type}
+                value={distance_type ?? ""}
                 onChange={event => {
                     setDistanceType(event.target.value as QueryT.DistanceType)
                     emitOnChange();
@@ -58,7 +58,7 @@ export default function DistanceInput(props: {
             type="number"
             variant="outlined"
             margin="dense"
-            value={distance_value}
+            value={distance_value ?? ""}
             onChange={event => {
                 let num = parseFloat(event.target.value);
                 setDistanceValue(Number.isNaN(num) ? null : num);

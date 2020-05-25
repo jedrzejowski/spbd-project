@@ -2,7 +2,7 @@ import React from "react";
 import MyMap from "./MyMap";
 import Grid from "@material-ui/core/Grid";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import QueryVisualizer from "./query/QueryVisualizer";
+import QueryPiker from "./query/QueryPiker";
 import {LatLngTuple} from "leaflet";
 
 const useClasses = makeStyles(theme => ({
@@ -55,7 +55,7 @@ export default function App() {
             </div>
 
             <div className={classes.query_root}>
-                <QueryVisualizer/>
+                <QueryPiker/>
             </div>
 
         </div>
