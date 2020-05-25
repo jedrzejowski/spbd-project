@@ -1,26 +1,31 @@
-import React, {useState} from "react";
-import QueryObject from "./QueryObject";
-import Button from "@material-ui/core/Button";
+import React from "react";
 import DestinationObject from "./DestinationObject";
 import CriterionObjects from "./CriterionObjects";
-import Typography from "@material-ui/core/Typography";
-import QueryT from "../../types/QueryT";
+import CardHeader from "@material-ui/core/CardHeader";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+
+const useClasses = makeStyles(theme => ({
+    root: {
+        "&> * + *": {
+            marginTop: theme.spacing(2)
+        }
+    }
+}), {name: "QueryVisualizer"});
 
 export default function QueryVisualizer() {
+    const classes = useClasses();
 
-    function distanceChanged(distance: QueryT.Distance) {
-        console.log('visualizer', distance);
-    }
 
-    function ObjectTypeChanged(objectType: QueryT.KnownObjectTypes) {
-        console.log('visualizer', objectType);
-    }
+    return <div className={classes.root}>
+        <Card>
+            <CardHeader title="Cel podróży"/>
+            <CardContent>
+                <DestinationObject/>
+            </CardContent>
+        </Card>
 
-    return <div>
-        <Typography variant="h6" gutterBottom>
-            Cel
-        </Typography>
-        <DestinationObject onDistanceChange={distanceChanged} onObjectTypeChange={ObjectTypeChanged}/>
         <CriterionObjects/>
     </div>
 }

@@ -1,4 +1,4 @@
-import * as pg from "pg";
+import pg from "pg";
 import Deferred from "./lib/Deferred";
 
 interface QueryResult<T = any> {

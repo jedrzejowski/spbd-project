@@ -3,29 +3,21 @@ import QueryT from "../../types/QueryT";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import TextField from "@material-ui/core/TextField";
 import useQueryDatabase from "../useQueryDatabase";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 
-
-const display_when: any[] = [
-    "hotel"
-];
-
-export default function SearchOsmInput(props: {
+export default function SearchOsmRow(props: {
     type: QueryT.KnownObjectTypes | null,
-    onChange?: (osm_ref: QueryT.OsmReference) => void
+    onChange?: (osm_ref: QueryT.OsmRowReference) => void
 }) {
     const queryDatabase = useQueryDatabase();
 
-    const [options, setOptions] = useState<QueryT.OsmReference[]>([]);
+    const [options, setOptions] = useState<QueryT.OsmRowReference[]>([]);
 
     useEffect(() => {
         setOptions([]);
     }, [props.type]);
 
-    function handleChange(osm_ref: QueryT.OsmReference | null) {
+    function handleChange(osm_ref: QueryT.OsmRowReference | null) {
 
     }
 
@@ -33,13 +25,13 @@ export default function SearchOsmInput(props: {
         variant="outlined"
         margin="dense"
         style={{
-            display: display_when.includes(props.type) ? undefined : "none"
+            width: "100%"
         }}
     >
         <Autocomplete
             options={options}
             getOptionLabel={(option) => option.name}
-            onChange={(event: object, option: QueryT.OsmReference | null) => handleChange(option)}
+            onChange={(event: object, option: QueryT.OsmRowReference | null) => handleChange(option)}
             renderInput={(params) => {
                 return <TextField {...params} label="Typ punktu" variant="outlined"/>
             }}

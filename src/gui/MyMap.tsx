@@ -9,21 +9,27 @@ export default function MyMap(props: {
     onChangeCenter?: (center: LatLngTuple) => void
 }) {
     const [center, setCenter] = useState<LatLngTuple>(positionStart);
-    function handleChange(center :LatLngTuple){
+
+    function handleChange(center: LatLngTuple) {
         setCenter(center);
         //props.onChangeCenter?.(center);
-        if (props.onChangeCenter){
+        if (props.onChangeCenter) {
             props.onChangeCenter(center);
         }
     }
-    return <Map center={positionStart} zoom={13} style={{
-        height: "100%",
-        width: "100%"
-    }} onViewportChange={event => {
-        const center = event.center;
-        if (center)
-            handleChange(center)
-    }}>
+
+    return <Map
+        center={positionStart}
+        zoom={13}
+        style={{
+            height: "100%",
+            width: "100%"
+        }}
+        onViewportChange={event => {
+            const center = event.center;
+            if (center)
+                handleChange(center)
+        }}>
         <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"

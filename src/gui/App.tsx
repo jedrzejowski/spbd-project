@@ -9,25 +9,56 @@ const useClasses = makeStyles(theme => ({
     root: {
         height: "100vh",
         width: "100%"
+    },
+    layout_root: {
+        position: "relative",
+        width: "100%",
+        height: "100%"
+    },
+    query_root: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        bottom: 0,
+        width: "350px",
+        overflowY: "scroll",
+        padding: theme.spacing(2),
+        paddingBottom: "50%",
+        background: "rgba(0, 0, 0, 0.3)",
+        "&::-webkit-scrollbar": {
+            display: "none"
+        },
+        zIndex: 2
+    },
+    map_root: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 1
     }
-}));
+}), {name: "App"});
 
 export default function App() {
     const classes = useClasses();
 
-    function centerChanged(center: LatLngTuple){
-        //console.log(center);
+    function centerChanged(center: LatLngTuple) {
     }
-    return <div>
-        <Grid container classes={{
-            root: classes.root
-        }}>
-            <Grid item xs={6}>
-                <QueryVisualizer/>
-            </Grid>
-            <Grid item xs={6}>
+
+    return <div className={classes.root}>
+
+        <div className={classes.layout_root}>
+
+            <div className={classes.map_root}>
                 <MyMap onChangeCenter={centerChanged}/>
-            </Grid>
-        </Grid>
+            </div>
+
+            <div className={classes.query_root}>
+                <QueryVisualizer/>
+            </div>
+
+        </div>
+
     </div>
 }

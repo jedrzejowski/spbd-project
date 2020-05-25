@@ -1,33 +1,33 @@
 namespace QueryT {
 
-
     export type DistanceType = "straight_line" | "car_distance" | "car_time";
-    export type DistanceOperator = "less_than" | "more_than";
 
     export interface Distance {
-        operator: DistanceOperator
         value: number
         type?: DistanceType
     }
 
-    export type KnownObjectTypes = "lat_long" | "tree" | "hotel";
+    export type KnownObjectTypes = "lat_lng" | "tree" | "hotel";
 
-    export interface PointBase {
+    export interface CriterionBase {
         type: KnownObjectTypes
-        distances: Distance[]
+        distance: Distance
     }
 
-    export interface HotelPoint extends PointBase {
-        type: "hotel",
-        osm_id: bigint
+    export type CriterionPoint = CriterionBase & OsmRowReference;
+
+    export interface CriterionLatLng extends CriterionBase {
+        type: "lat_lng",
+        lat: number
+        lng: number
     }
 
-    export type AnyPoint = HotelPoint ;
+    export type CriterionAny = CriterionLatLng | CriterionPoint;
 
-    export interface OsmReference {
-        type: string
+    export interface OsmRowReference {
+        type: Exclude<KnownObjectTypes, "lat_long">
         osm_id: bigint,
-        table: "polygon" | "point" | "line" | "roads",
+        table: "polygon" | "point" | "line",
         name: string
     }
 }

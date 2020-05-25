@@ -2,84 +2,114 @@ import React, {useState} from "react";
 import TextField from "@material-ui/core/TextField";
 import QueryT from "../../types/QueryT";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import {Paper} from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
 import KnownObjectTypeInput from "../input/KnownObjectTypeInput";
-import DistancesInput from "./DistancesInput";
-import SearchOsmInput from "../input/SearchOsmInput";
-import DistanceInput from "./DistanceInput";
-import {LatLngTuple} from "leaflet";
-
+import DistanceInput from "../input/DistanceInput";
+import SearchOsmRow from "../input/SearchOsmRow";
 
 const useClasses = makeStyles(theme => ({
     input_root: {
         display: "flex",
         flexDirection: "column",
-        padding: theme.spacing(1),
-        "& > * + *": {
-            marginTop: theme.spacing(1),
-            width: "100%"
-        }
     }
 }), {name: "DestinationObject"});
 
-export default function DestinationObject(props:{
-    onDistanceChange?: (point: QueryT.Distance) => void,
-    onObjectTypeChange?: (point: QueryT.KnownObjectTypes) => void
+export default function DestinationObject(props: {
+    onChange?: (criterion: QueryT.CriterionAny | null) => void,
+    onDistanceChange?: (distance: QueryT.Distance | null) => void,
+    onObjectTypeChange?: (object_type: QueryT.KnownObjectTypes | null) => void
 }) {
+    const classes = useClasses();
+    const [object_type, setObjectType] = useState<QueryT.KnownObjectTypes | null>(null);
+    const [latitude, setLatitude] = useState<number | null>(null);
+    const [longitude, setLongitude] = useState<number | null>(null);
     const [distance, setDistance] = useState<QueryT.Distance | null>();
 
-    const classes = useClasses();
+    function emitChange() {
+        if (distance == null || object_type == null) {
+            props.onChange?.(null);
+            return;
+        }
 
-    const [object_type, setObjectType] = useState<QueryT.KnownObjectTypes | null>(null);
-
-    function handleDistanceChange(distance: QueryT.Distance | undefined | null){
-
-        if (props.onDistanceChange && distance) {
-            props.onDistanceChange(distance);
-            setDistance(distance);
+        if (object_type == "lat_lng") {
+            if (latitude != null && longitude != null) {
+                let criterion: QueryT.CriterionLatLng = {
+                    type: "lat_lng",
+                    distance,
+                    lat: latitude,
+                    lng: longitude,
+                };
+                props.onChange?.(criterion);
+            } else {
+                props.onChange?.(null);
+            }
+        } else {
+            // let criterion: QueryT.CriterionPoint = {
+            //     type: object_type,
+            //     distance,
+            //     lat: latitude,
+            //     lng: longitude,
+            // };
+            props.onChange?.(null);
         }
     }
 
-    function handleObjectTypeChange(objectType: QueryT.KnownObjectTypes | undefined | null){
-        if (props.onObjectTypeChange && objectType) {
-            props.onObjectTypeChange(objectType);
-            setObjectType(objectType);
-        }
+    function handleDistanceChange(distance: QueryT.Distance | null) {
+        setDistance(distance);
+        props.onDistanceChange?.(distance);
+        emitChange();
     }
+
+    function handleObjectTypeChange(object_type: QueryT.KnownObjectTypes | null) {
+        setObjectType(object_type);
+        props.onObjectTypeChange?.(object_type);
+        emitChange();
+    }
+
+    const display_rowsearch = object_type !== null && object_type != "lat_lng";
+    const display_latlng = object_type == "lat_lng";
 
     return <div>
-        <Paper elevation={3}>
-            <div className={classes.input_root}>
-                <KnownObjectTypeInput
-                    onChange={type =>
-                        handleObjectTypeChange(type)
-                    }/>
+        <div className={classes.input_root}>
 
-                <TextField
-                    label="Szerokość"
-                    type="number"
-                    variant="outlined"
-                    style={{
-                        display: object_type == "lat_long" ? undefined : "none"
-                    }}
-                />
-                <TextField
-                    label="Długość"
-                    type="number"
-                    variant="outlined"
-                    style={{
-                        display: object_type == "lat_long" ? undefined : "none"
-                    }}
-                />
+            <KnownObjectTypeInput value={object_type} onChange={type => handleObjectTypeChange(type)}/>
 
-                <DistanceInput
-                    distance={distance}
-                    onChange={value => {
-                        handleDistanceChange(value);
-                    }}/>
-
+            <div style={{
+                display: display_rowsearch ? undefined : "none",
+            }}>
+                <SearchOsmRow type={object_type}/>
             </div>
-        </Paper>
+
+            <TextField
+                label="Szerokość"
+                type="number"
+                variant="outlined"
+                margin="dense"
+                value={longitude}
+                onChange={event => {
+                    const num = parseFloat(event.target.value);
+                    setLongitude(Number.isNaN(num) ? null : num);
+                }}
+                style={{
+                    display: display_latlng ? undefined : "none"
+                }}
+            />
+            <TextField
+                label="Długość"
+                type="number"
+                variant="outlined"
+                margin="dense"
+                value={latitude}
+                onChange={event => {
+                    const num = parseFloat(event.target.value);
+                    setLatitude(Number.isNaN(num) ? null : num);
+                }}
+                style={{
+                    display: object_type == "lat_lng" ? undefined : "none"
+                }}
+            />
+
+            <DistanceInput onChange={value => handleDistanceChange(value)}/>
+
+        </div>
     </div>
 }
