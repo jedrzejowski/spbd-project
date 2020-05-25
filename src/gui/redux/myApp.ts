@@ -2,7 +2,8 @@ import AppData from "./AppData";
 import {Action, Actions} from "./actions";
 
 const initial_state: AppData.State = {
-    criterions: {}
+    criterions: {},
+    map_center: [51.505, 22.09]
 };
 
 export default function myApp<T extends keyof Actions>(
@@ -36,6 +37,11 @@ export default function myApp<T extends keyof Actions>(
                 ...state,
                 criterions: new_criterions
             }
+        }
+
+        case "MAP_CENTER_SET":{
+            const tuple = action.data as Actions["MAP_CENTER_SET"];
+
         }
 
         default:

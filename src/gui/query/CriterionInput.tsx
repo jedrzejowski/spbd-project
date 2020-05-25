@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import TextField from "@material-ui/core/TextField";
 import QueryT from "../../types/QueryT";
 import makeStyles from "@material-ui/core/styles/makeStyles";
@@ -6,6 +6,7 @@ import KnownObjectTypeInput from "../input/KnownObjectTypeInput";
 import DistanceInput from "../input/DistanceInput";
 import SearchOsmRow from "../input/SearchOsmRow";
 import useAppDispatch from "../hooks/useAppDispatch";
+import useAppSelector from "../hooks/useAppSelector";
 
 const useClasses = makeStyles(theme => ({
     input_root: {
@@ -24,12 +25,14 @@ export default function CriterionInput(props: {
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const [distance, setDistance] = useState<QueryT.Distance | null>();
+    const map_center = useAppSelector(state => state.map_center);
 
     function emitChange(criterion: QueryT.CriterionAny | null) {
         dispatch("CRITERION_SET", {criterion_id, criterion});
     }
 
-    function emitRightChange() {
+    useEffect(() => {
+
         if (distance == null || object_type == null) {
             emitChange(null);
             return;
@@ -56,17 +59,14 @@ export default function CriterionInput(props: {
             // };
             emitChange(null);
         }
-    }
+    }, [object_type, latitude, longitude, distance])
 
-    function handleDistanceChange(distance: QueryT.Distance | null) {
-        setDistance(distance);
-        emitRightChange();
-    }
-
-    function handleObjectTypeChange(object_type: QueryT.KnownObjectTypes | null) {
-        setObjectType(object_type);
-        emitRightChange();
-    }
+    useEffect(() => {
+        if (object_type === "lat_lng") {
+            setLatitude(map_center[0]);
+            setLongitude(map_center[1]);
+        }
+    }, [object_type])
 
     const display_rowsearch = object_type !== null && object_type != "lat_lng";
     const display_latlng = object_type == "lat_lng";
@@ -74,7 +74,7 @@ export default function CriterionInput(props: {
     return <div>
         <div className={classes.input_root}>
 
-            <KnownObjectTypeInput value={object_type} onChange={type => handleObjectTypeChange(type)}/>
+            <KnownObjectTypeInput value={object_type} onChange={type => setObjectType(type)}/>
 
             <div style={{
                 display: display_rowsearch ? undefined : "none",
@@ -111,7 +111,7 @@ export default function CriterionInput(props: {
                 }}
             />
 
-            <DistanceInput onChange={value => handleDistanceChange(value)}/>
+            <DistanceInput onChange={value => setDistance(value)}/>
 
         </div>
     </div>

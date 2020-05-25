@@ -1,10 +1,12 @@
-import QueryT from "../../types/QueryT";
-import Dictionary from "../../types/Dictionary";
+import type QueryT from "../../types/QueryT";
+import type Dictionary from "../../types/Dictionary";
+import type {LatLngTuple} from "leaflet";
 
 declare namespace AppData {
 
     interface State {
         criterions: Criterions
+        map_center: LatLngTuple
     }
 
     type Criterions = Dictionary<QueryT.CriterionAny | null>;

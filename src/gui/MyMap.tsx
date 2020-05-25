@@ -1,22 +1,22 @@
-import React, {useState} from 'react'
-import {Map, Marker, Popup, TileLayer, ZoomControl} from "react-leaflet"
+import React from 'react'
+import {Circle, Map, Marker, Popup, TileLayer, ZoomControl} from "react-leaflet"
 import {LatLngTuple} from "leaflet";
+import useAppSelector from "./hooks/useAppSelector";
+import QueryT from "../types/QueryT";
+import useAppDispatch from "./hooks/useAppDispatch";
 
-const positionStart: LatLngTuple = [51.505, 22.09];
 
+export default function MyMap() {
+    const dispatch = useAppDispatch();
+    const criterions = useAppSelector(state => state.criterions);
+    const map_center = useAppSelector(state => state.map_center);
 
-export default function MyMap(props: {
-    onChangeCenter?: (center: LatLngTuple) => void
-}) {
-    const [center, setCenter] = useState<LatLngTuple>(positionStart);
-
-    function handleChange(center: LatLngTuple) {
-        setCenter(center);
-        props.onChangeCenter?.(center);
+    function setMapCenter(center: LatLngTuple) {
+        dispatch("MAP_CENTER_SET", center);
     }
 
     return <Map
-        center={positionStart}
+        center={map_center}
         zoom={13}
         zoomControl={false}
         style={{
@@ -25,8 +25,7 @@ export default function MyMap(props: {
         }}
         onViewportChange={event => {
             const center = event.center;
-            if (center)
-                handleChange(center)
+            if (center) setMapCenter(center);
         }}
     >
         <ZoomControl position="topright"/>
@@ -34,8 +33,35 @@ export default function MyMap(props: {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
         />
-        <Marker position={center}>
-            <Popup>A pretty CSS3 popup.<br/>Easily customizable.</Popup>
-        </Marker>
+
+        {Object.keys(criterions).map(criterion_id => {
+            const criterion = criterions[criterion_id];
+
+            if (criterion === null)
+                return [];
+
+            return mapCriterion(criterion_id, criterion);
+        }).flat()}
+
     </Map>
+}
+
+function mapCriterion(criterion_id: string, criterion: QueryT.CriterionAny) {
+
+    if (criterion.type === "lat_lng") {
+        const typed_criterion = criterion as QueryT.CriterionLatLng;
+        const position = [typed_criterion.lat, typed_criterion.lng] as LatLngTuple;
+
+        return [
+            <Circle center={position} radius={typed_criterion.distance.value}/>,
+            <Marker
+                position={position}
+                key={`marker_${criterion_id}`}
+            >
+                <Popup>A pretty CSS3 popup.<br/>Easily customizable.</Popup>
+            </Marker>
+        ];
+    }
+
+    return undefined;
 }

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
@@ -23,15 +23,16 @@ export default function DistanceInput(props: {
     const [distance_type, setDistanceType] = useState<QueryT.DistanceType | null>(props.defaultDistance?.type ?? null);
     const [distance_value, setDistanceValue] = useState<number | null>(props.defaultDistance?.value ?? null);
 
-    function emitOnChange() {
-
+    useEffect(() => {
         if (distance_type != null && distance_value != null) {
             onChange({
                 type: distance_type,
                 value: distance_value,
             });
+        } else {
+            onChange(null);
         }
-    }
+    }, [distance_type, distance_value])
 
     return <div>
 
@@ -43,7 +44,6 @@ export default function DistanceInput(props: {
                 value={distance_type ?? ""}
                 onChange={event => {
                     setDistanceType(event.target.value as QueryT.DistanceType)
-                    emitOnChange();
                 }}
             >
                 <MenuItem value="straight_line">Linia prosta [m]</MenuItem>
@@ -62,7 +62,6 @@ export default function DistanceInput(props: {
             onChange={event => {
                 let num = parseFloat(event.target.value);
                 setDistanceValue(Number.isNaN(num) ? null : num);
-                emitOnChange();
             }}
         />
     </div>

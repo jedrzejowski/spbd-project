@@ -1,8 +1,10 @@
-import QueryT from "../../types/QueryT";
+import type QueryT from "../../types/QueryT";
+import type {LatLngTuple} from "leaflet";
 
 export interface Actions {
     CRITERION_SET: { criterion_id: string, criterion: QueryT.CriterionAny | null }
     CRITERION_DELETE: { criterion_id: string }
+    MAP_CENTER_SET: LatLngTuple
 }
 
 export interface Action<T extends keyof Actions = any> {
