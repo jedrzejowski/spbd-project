@@ -2,7 +2,7 @@ import AppData from "./AppData";
 import {Action, Actions} from "./actions";
 
 const initial_state: AppData.State = {
-    now_querying: false,
+    query_state: "picker",
     criterions: {},
     map_center: [51.505, 22.09],
     results: null
@@ -50,12 +50,21 @@ export default function myApp<T extends keyof Actions>(
             }
         }
 
-        case "NOW_QUERYING_SET": {
-            const now_querying = action.data as Actions["NOW_QUERYING_SET"];
+        case "QUERY_STATE_SET": {
+            const query_state = action.data as Actions["QUERY_STATE_SET"];
 
             return {
                 ...state,
-                now_querying
+                query_state
+            }
+        }
+
+        case "RESULTS_SET":{
+            const results = action.data as Actions["RESULTS_SET"];
+
+            return {
+                ...state,
+                results
             }
         }
 

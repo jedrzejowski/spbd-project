@@ -5,12 +5,13 @@ import type {LatLngTuple} from "leaflet";
 declare namespace AppData {
 
     interface State {
-        now_querying: boolean
+        query_state: QueryState
         criterions: Criterions
         map_center: LatLngTuple
         results: QueryT.Result[] | null
     }
 
+    type QueryState = "picker" | "querying" | "result" | "error" ;
     type Criterions = Dictionary<QueryT.CriterionAny | null>;
 }
 

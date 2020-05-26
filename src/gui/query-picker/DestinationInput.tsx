@@ -2,9 +2,9 @@ import React, {useState} from "react";
 import TextField from "@material-ui/core/TextField";
 import QueryT from "../../types/QueryT";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import KnownObjectTypeInput from "../input/KnownObjectTypeInput";
-import DistanceInput from "../input/DistanceInput";
-import SearchOsmRow from "../input/SearchOsmRow";
+import KnownObjectTypeInput from "./KnownObjectTypeInput";
+import DistanceInput from "./DistanceInput";
+import SearchOsmRow from "./SearchOsmRow";
 import useAppDispatch from "../hooks/useAppDispatch";
 
 const useClasses = makeStyles(theme => ({
@@ -12,7 +12,7 @@ const useClasses = makeStyles(theme => ({
         display: "flex",
         flexDirection: "column",
     }
-}), {name: "DestinationObject"});
+}), {name: "DestinationInput"});
 
 export default function DestinationInput() {
     const classes = useClasses();

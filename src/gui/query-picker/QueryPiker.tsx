@@ -21,6 +21,9 @@ export default function QueryPiker() {
     const classes = useClasses();
     const dispatch = useAppDispatch();
 
+    function startQuery() {
+        dispatch("QUERY_STATE_SET", "querying");
+    }
 
     return <div className={classes.root}>
         <Card>
@@ -29,7 +32,7 @@ export default function QueryPiker() {
                 <DestinationInput/>
             </CardContent>
             <CardActions>
-                <Button>
+                <Button onClick={startQuery}>
                     Szukaj
                 </Button>
                 <Button>

@@ -1,7 +1,10 @@
 import React from "react";
 import MyMap from "./MyMap";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import QueryPiker from "./query/QueryPiker";
+import QueryPiker from "./query-picker/QueryPiker";
+import useAppSelector from "./hooks/useAppSelector";
+import ResultViewer from "./result-viewer/ResultViewer";
+import QueryDialog from "./query-dialog/QueryDialog";
 
 const useClasses = makeStyles(theme => ({
     root: {
@@ -13,7 +16,7 @@ const useClasses = makeStyles(theme => ({
         width: "100%",
         height: "100%"
     },
-    query_root: {
+    menu_root: {
         position: "absolute",
         top: 0,
         left: 0,
@@ -40,6 +43,7 @@ const useClasses = makeStyles(theme => ({
 
 export default function App() {
     const classes = useClasses();
+    const query_state = useAppSelector(state => state.query_state);
 
     return <div className={classes.root}>
 
@@ -49,9 +53,19 @@ export default function App() {
                 <MyMap/>
             </div>
 
-            <div className={classes.query_root}>
+            <div className={classes.menu_root} style={{
+                display: query_state === "picker" ? undefined : "none"
+            }}>
                 <QueryPiker/>
             </div>
+
+            <div className={classes.menu_root} style={{
+                display: query_state === "result" ? undefined : "none"
+            }}>
+                <ResultViewer/>
+            </div>
+
+            <QueryDialog/>
 
         </div>
 
