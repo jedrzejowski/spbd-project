@@ -43,6 +43,7 @@
         "leaflet": "^1.6.0",
         "node-sass": "^4.14.1",
         "pg": "^8.2.1",
+        "pg-native": "^3.0.0",
         "react-leaflet": "^2.7.0",
         "react-redux": "^7.2.0",
         "redux": "^4.0.5",
