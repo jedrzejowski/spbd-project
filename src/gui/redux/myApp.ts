@@ -2,8 +2,10 @@ import AppData from "./AppData";
 import {Action, Actions} from "./actions";
 
 const initial_state: AppData.State = {
+    now_querying: false,
     criterions: {},
-    map_center: [51.505, 22.09]
+    map_center: [51.505, 22.09],
+    results: null
 };
 
 export default function myApp<T extends keyof Actions>(
@@ -39,9 +41,22 @@ export default function myApp<T extends keyof Actions>(
             }
         }
 
-        case "MAP_CENTER_SET":{
-            const tuple = action.data as Actions["MAP_CENTER_SET"];
+        case "MAP_CENTER_SET": {
+            const map_center = action.data as Actions["MAP_CENTER_SET"];
 
+            return {
+                ...state,
+                map_center
+            }
+        }
+
+        case "NOW_QUERYING_SET": {
+            const now_querying = action.data as Actions["NOW_QUERYING_SET"];
+
+            return {
+                ...state,
+                now_querying
+            }
         }
 
         default:

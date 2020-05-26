@@ -59,6 +59,9 @@ export default function DistanceInput(props: {
             variant="outlined"
             margin="dense"
             value={distance_value ?? ""}
+            inputProps={{
+                step: distance_value ? Math.round(distance_value * 0.1) : 1
+            }}
             onChange={event => {
                 let num = parseFloat(event.target.value);
                 setDistanceValue(Number.isNaN(num) ? null : num);

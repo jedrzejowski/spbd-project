@@ -5,6 +5,9 @@ import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import DestinationInput from "./DestinationInput";
+import CardActions from "@material-ui/core/CardActions";
+import Button from "@material-ui/core/Button";
+import useAppDispatch from "../hooks/useAppDispatch";
 
 const useClasses = makeStyles(theme => ({
     root: {
@@ -16,6 +19,7 @@ const useClasses = makeStyles(theme => ({
 
 export default function QueryPiker() {
     const classes = useClasses();
+    const dispatch = useAppDispatch();
 
 
     return <div className={classes.root}>
@@ -24,6 +28,14 @@ export default function QueryPiker() {
             <CardContent>
                 <DestinationInput/>
             </CardContent>
+            <CardActions>
+                <Button>
+                    Szukaj
+                </Button>
+                <Button>
+                    Wyczyść
+                </Button>
+            </CardActions>
         </Card>
 
         <CriterionObjects/>

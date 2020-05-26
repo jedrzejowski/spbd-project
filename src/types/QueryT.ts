@@ -32,12 +32,8 @@ namespace QueryT {
         way_txt: string
     }
 
-    interface FullQuery {
-    }
-
-    interface PartialQuery {
-        // destination:
-        criterions: CriterionAny[]
+    export interface Result {
+        name: string
     }
 }
 

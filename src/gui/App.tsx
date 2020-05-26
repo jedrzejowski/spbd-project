@@ -1,9 +1,7 @@
 import React from "react";
 import MyMap from "./MyMap";
-import Grid from "@material-ui/core/Grid";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import QueryPiker from "./query/QueryPiker";
-import {LatLngTuple} from "leaflet";
 
 const useClasses = makeStyles(theme => ({
     root: {
@@ -43,15 +41,12 @@ const useClasses = makeStyles(theme => ({
 export default function App() {
     const classes = useClasses();
 
-    function centerChanged(center: LatLngTuple) {
-    }
-
     return <div className={classes.root}>
 
         <div className={classes.layout_root}>
 
             <div className={classes.map_root}>
-                <MyMap onChangeCenter={centerChanged}/>
+                <MyMap/>
             </div>
 
             <div className={classes.query_root}>
