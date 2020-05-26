@@ -24,6 +24,15 @@ export default function CriterionInput(props: {
     const [object_type, setObjectType] = useState<QueryT.KnownObjectTypes | null>(null);
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
+    const criterion = useAppSelector(state => state.criterions[criterion_id]);
+    if (criterion?.type === "lat_lng"
+        && (criterion as QueryT.CriterionLatLng).lat !== latitude // badamy czy zostało zmienione w tym komponencie, czy na zewnątrz (poprzez przemieszczenie markera)
+        && (criterion as QueryT.CriterionLatLng).lng !== longitude
+    ){
+        setLatitude((criterion as QueryT.CriterionLatLng).lat);
+        setLongitude((criterion as QueryT.CriterionLatLng).lng);
+    }
+
     const [distance, setDistance] = useState<QueryT.Distance | null>();
     const map_center = useAppSelector(state => state.map_center);
 

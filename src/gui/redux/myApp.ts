@@ -4,7 +4,7 @@ import {Action, Actions} from "./actions";
 const initial_state: AppData.State = {
     query_state: "picker",
     criterions: {},
-    map_center: [51.505, 22.09],
+    map_center: [52.230032086031315, 21.01194262504578],
     results: null
 };
 
@@ -14,7 +14,6 @@ export default function myApp<T extends keyof Actions>(
 ): AppData.State {
 
     let type: T = action.type;
-
     switch (type) {
 
         case "CRITERION_SET": {
