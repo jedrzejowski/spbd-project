@@ -7,7 +7,7 @@ import FormControl from "@material-ui/core/FormControl";
 
 export default function SearchOsmRow(props: {
     type: QueryT.KnownObjectTypes | null,
-    onChange?: (osm_ref: QueryT.OsmRowReference) => void
+    onChange?: (osm_ref: QueryT.OsmRowReference | null) => void
 }) {
     const queryDatabase = useQueryDatabase();
 

@@ -14,7 +14,10 @@ namespace QueryT {
         distance: Distance
     }
 
-    export type CriterionPoint = CriterionBase & OsmRowReference;
+    export interface CriterionPoint extends CriterionBase {
+        type: Exclude<KnownObjectTypes, "lat_long">
+        osm_row: OsmRowReference | null
+    }
 
     export interface CriterionLatLng extends CriterionBase {
         type: "lat_lng",
@@ -25,7 +28,6 @@ namespace QueryT {
     export type CriterionAny = CriterionLatLng | CriterionPoint;
 
     export interface OsmRowReference {
-        type: Exclude<KnownObjectTypes, "lat_long">
         osm_id: bigint,
         table: "polygon" | "point" | "line",
         name: string

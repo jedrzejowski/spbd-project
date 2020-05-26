@@ -21,10 +21,12 @@ export default function CriterionInput(props: {
     const criterion_id = props.id;
     const classes = useClasses();
     const dispatch = useAppDispatch();
+
     const [object_type, setObjectType] = useState<QueryT.KnownObjectTypes | null>(null);
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const [distance, setDistance] = useState<QueryT.Distance | null>();
+    const [osm_row, setOsmRow] = useState<QueryT.OsmRowReference | null>(null);
     const map_center = useAppSelector(state => state.map_center);
 
     function emitChange(criterion: QueryT.CriterionAny | null) {
@@ -51,13 +53,12 @@ export default function CriterionInput(props: {
                 emitChange(null);
             }
         } else {
-            // let criterion: QueryT.CriterionPoint = {
-            //     type: object_type,
-            //     distance,
-            //     lat: latitude,
-            //     lng: longitude,
-            // };
-            emitChange(null);
+            let criterion: QueryT.CriterionPoint = {
+                type: object_type,
+                distance,
+                osm_row
+            };
+            emitChange(criterion);
         }
     }, [object_type, latitude, longitude, distance])
 
@@ -79,7 +80,7 @@ export default function CriterionInput(props: {
             <div style={{
                 display: display_rowsearch ? undefined : "none",
             }}>
-                <SearchOsmRow type={object_type}/>
+                <SearchOsmRow type={object_type} onChange={osm_ref => setOsmRow(osm_ref)}/>
             </div>
 
             <TextField
