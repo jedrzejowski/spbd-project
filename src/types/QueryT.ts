@@ -7,7 +7,24 @@ namespace QueryT {
         type?: DistanceType
     }
 
-    export type KnownObjectTypes = "lat_lng" | "tree" | "hotel";
+    export type KnownObjectTypes = "lat_lng" |
+        "tree" | //naturals
+        "hotel" | //tourism
+        "zoo" | //tourism
+        "museum" | //tourism
+        "hostel" | //tourism
+        "motel" | //tourism
+        "supermarket" | //shop
+        "alcohol" | //shop
+        "bakery" | //shop
+        "atm" | //amenity
+        "fast_food" |//amenity
+        "post_office" |// amenity
+        "bank" | //amenity
+        "pharmacy" | //amenity
+        "library" | //amenity
+        "bench" //amenity
+        ;
 
     export interface CriterionBase {
         type: KnownObjectTypes

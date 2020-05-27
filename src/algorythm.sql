@@ -16,8 +16,8 @@ $$
                         p1.way_4326
         from planet_osm_point p1,
              planet_osm_point p2
-        where p1.tourism = 'hotel'
-          and p2.natural = 'tree'
+        where p1.tourism = $1
+          and p2.natural = $2
           and ST_DistanceSpheroid('SRID=4326;POINT(20.9476681 52.2382989991)'::geometry,
                                   p1.way_4326, 'SPHEROID["WGS 84",6378137,298.257223563]') < 10000
           and ST_DistanceSpheroid(p1.way_4326, p2.way_4326, 'SPHEROID["WGS 84",6378137,298.257223563]') < 100

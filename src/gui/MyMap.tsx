@@ -52,11 +52,12 @@ export default function MyMap() {
         })}
 
         {Object.keys(criterions).map((criterion_id, index) => {
-            return <MapCriterionAssets
-                key={criterion_id}
-                index={index}
-                criterion_id={criterion_id}
-            />
+            if (res.length === 0)
+                return <MapCriterionAssets
+                    key={criterion_id}
+                    index={index}
+                    criterion_id={criterion_id}
+                />
         })}
 
     </Map>
