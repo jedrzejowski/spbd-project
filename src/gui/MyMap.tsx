@@ -11,11 +11,13 @@ export default function MyMap() {
     const [zoom, setZoom] = useState<number>(13);
     const criterions = useAppSelector(state => state.criterions);
     const map_center = useAppSelector(state => state.map_center);
+    const results = useAppSelector(state => state.results);
+
+    let res = results ? results : [];
 
     function setMapCenter(center: LatLngTuple) {
         dispatch("MAP_CENTER_SET", center);
     }
-
     return <Map
         center={map_center}
         zoom={zoom}
@@ -36,12 +38,25 @@ export default function MyMap() {
             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
         />
 
-        {Object.keys(criterions).map((criterion_id, index) => {
+        {Object.keys(res).map((string, index) => {
+                    const result = res[index];
+                    const position = [result.y, result.x] as LatLngTuple;
+                    return <>
+                        <Marker
+                            position={position}
+                        >
+                            <Popup>{result.name}</Popup>
+                        </Marker>
+                    </>
+            //
+        })}
 
+        {Object.keys(criterions).map((criterion_id, index) => {
             return <MapCriterionAssets
                 key={criterion_id}
                 index={index}
-                criterion_id={criterion_id}/>
+                criterion_id={criterion_id}
+            />
         })}
 
     </Map>
@@ -82,6 +97,5 @@ function MapCriterionAssets(props: {
             </Marker>
         </>
     }
-
     return <></>;
 }

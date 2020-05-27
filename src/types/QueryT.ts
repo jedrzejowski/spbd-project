@@ -36,6 +36,8 @@ namespace QueryT {
 
     export interface Result {
         name: string
+        x: number
+        y: number
     }
 }
 
