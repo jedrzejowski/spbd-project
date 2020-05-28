@@ -34,7 +34,13 @@ export default function QueryDialog() {
                 return app_state.criterions[criterion_id];
             }).filter(notNullOrUndef);
 
+            if (app_state.destination === null) {
+                console.error("to trzeba obsłużyć")
+                return;
+            }
+
             spbd_algorithm({
+                destination: app_state.destination,
                 criterions
             }).then(results => {
                 dispatch("RESULTS_SET", results);

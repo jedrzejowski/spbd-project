@@ -10,7 +10,7 @@ interface OptionDef {
 
 const options: OptionDef[] = [{
     label: "Współrzędne",
-    type: "lat_lng"
+    type: "lng_lat"
 }, {
     label: "Hotel",
     type: "hotel"
@@ -22,7 +22,8 @@ const options: OptionDef[] = [{
 
 export default function KnownObjectTypeInput(props: {
     value?: QueryT.KnownObjectTypes | null
-    onChange?: (type: QueryT.KnownObjectTypes | null) => void
+    onChange?: (type: QueryT.KnownObjectTypes | null) => void,
+    lngLat?: boolean
 }) {
 
     const default_value = options.find(option => option.type === props.value);

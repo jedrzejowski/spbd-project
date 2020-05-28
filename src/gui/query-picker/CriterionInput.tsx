@@ -26,13 +26,6 @@ export default function CriterionInput(props: {
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const criterion = useAppSelector(state => state.criterions[criterion_id]);
-    if (criterion?.type === "lat_lng"
-        && (criterion as QueryT.CriterionLatLng).lat !== latitude // badamy czy zostało zmienione w tym komponencie, czy na zewnątrz (poprzez przemieszczenie markera)
-        && (criterion as QueryT.CriterionLatLng).lng !== longitude
-    ){
-        setLatitude((criterion as QueryT.CriterionLatLng).lat);
-        setLongitude((criterion as QueryT.CriterionLatLng).lng);
-    }
 
     const [distance, setDistance] = useState<QueryT.Distance | null>();
     const [osm_row, setOsmRow] = useState<QueryT.OsmRowReference | null>(null);
@@ -49,10 +42,10 @@ export default function CriterionInput(props: {
             return;
         }
 
-        if (object_type == "lat_lng") {
+        if (object_type == "lng_lat") {
             if (latitude != null && longitude != null) {
                 let criterion: QueryT.CriterionLatLng = {
-                    type: "lat_lng",
+                    type: "lng_lat",
                     distance,
                     lat: latitude,
                     lng: longitude,
@@ -72,14 +65,27 @@ export default function CriterionInput(props: {
     }, [object_type, latitude, longitude, distance])
 
     useEffect(() => {
-        if (object_type === "lat_lng") {
+        if (object_type === "lng_lat") {
             setLatitude(map_center[0]);
             setLongitude(map_center[1]);
         }
     }, [object_type])
 
-    const display_rowsearch = object_type !== null && object_type != "lat_lng";
-    const display_latlng = object_type == "lat_lng";
+    useEffect(() => {
+        if (criterion?.type === "lng_lat") {
+            const criterion_typed = criterion as QueryT.CriterionLatLng;
+
+            // badamy czy zostało zmienione w tym komponencie, czy na zewnątrz (poprzez przemieszczenie markera)
+            if (criterion_typed.lat !== latitude || criterion_typed.lng !== longitude) {
+                setLatitude(criterion_typed.lat);
+                setLongitude(criterion_typed.lng);
+            }
+        }
+
+    }, [criterion])
+
+    const display_rowsearch = object_type !== null && object_type != "lng_lat";
+    const display_latlng = object_type == "lng_lat";
 
     return <div>
         <div className={classes.input_root}>
@@ -117,7 +123,7 @@ export default function CriterionInput(props: {
                     setLatitude(Number.isNaN(num) ? null : num);
                 }}
                 style={{
-                    display: object_type == "lat_lng" ? undefined : "none"
+                    display: object_type == "lng_lat" ? undefined : "none"
                 }}
             />
 

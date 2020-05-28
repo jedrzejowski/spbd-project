@@ -9,15 +9,15 @@ import useAppDispatch from "./hooks/useAppDispatch";
 export default function MyMap() {
     const dispatch = useAppDispatch();
     const [zoom, setZoom] = useState<number>(13);
-    const criterions = useAppSelector(state => state.criterions);
     const map_center = useAppSelector(state => state.map_center);
+    const criterions = useAppSelector(state => state.criterions);
     const results = useAppSelector(state => state.results);
-
-    let res = results ? results : [];
+    const query_state = useAppSelector(state => state.query_state);
 
     function setMapCenter(center: LatLngTuple) {
         dispatch("MAP_CENTER_SET", center);
     }
+
     return <Map
         center={map_center}
         zoom={zoom}
@@ -38,27 +38,15 @@ export default function MyMap() {
             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
         />
 
-        {Object.keys(res).map((string, index) => {
-                    const result = res[index];
-                    const position = [result.y, result.x] as LatLngTuple;
-                    return <>
-                        <Marker
-                            position={position}
-                        >
-                            <Popup>{result.name}</Popup>
-                        </Marker>
-                    </>
-            //
-        })}
+        {query_state == "result" && results
+            ?.map((result, index) => {
+                return <ResultAssets key={index} result={result}/>
+            })}
 
-        {Object.keys(criterions).map((criterion_id, index) => {
-            if (res.length === 0)
-                return <MapCriterionAssets
-                    key={criterion_id}
-                    index={index}
-                    criterion_id={criterion_id}
-                />
-        })}
+        {query_state == "picker" && Object.keys(criterions)
+            .map((criterion_id, index) => {
+                return <MapCriterionAssets key={criterion_id} index={index} criterion_id={criterion_id}/>
+            })}
 
     </Map>
 }
@@ -73,7 +61,7 @@ function MapCriterionAssets(props: {
     if (criterion === null)
         return <></>;
 
-    if (criterion.type === "lat_lng") {
+    if (criterion.type === "lng_lat") {
         const typed_criterion = criterion as QueryT.CriterionLatLng;
         const position = [typed_criterion.lat, typed_criterion.lng] as LatLngTuple;
 
@@ -99,4 +87,20 @@ function MapCriterionAssets(props: {
         </>
     }
     return <></>;
+}
+
+function ResultAssets(props: {
+    result: QueryT.Result
+}) {
+    const {result} = props;
+
+    const position = [result.y, result.x] as LatLngTuple;
+
+    return <>
+        <Marker
+            position={position}
+        >
+            <Popup>{result.name}</Popup>
+        </Marker>
+    </>
 }

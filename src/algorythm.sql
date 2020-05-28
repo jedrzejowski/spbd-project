@@ -19,8 +19,8 @@ $$
         where p1.tourism = $1
           and p2.natural = $2
           and ST_DistanceSpheroid('SRID=4326;POINT(20.9476681 52.2382989991)'::geometry,
-                                  p1.way_4326, 'SPHEROID["WGS 84",6378137,298.257223563]') < 10000
-          and ST_DistanceSpheroid(p1.way_4326, p2.way_4326, 'SPHEROID["WGS 84",6378137,298.257223563]') < 100
+                                  p1.way_4326, earth_spheroid) < 10000
+          and ST_DistanceSpheroid(p1.way_4326, p2.way_4326, earth_spheroid) < 100
         order by p1.osm_id;
 
         create temp table my_paths as
@@ -31,7 +31,7 @@ $$
                    order by ST_DistanceSpheroid(
                                     vert.the_geom,
                                     point.way_4326,
-                                    'SPHEROID["WGS 84",6378137,298.257223563]')
+                                    earth_spheroid)
                    limit 1
                )::bigint    as end_vert_id,
                null::float8 as length_m,

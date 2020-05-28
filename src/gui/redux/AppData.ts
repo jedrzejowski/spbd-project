@@ -6,6 +6,7 @@ declare namespace AppData {
 
     interface State {
         query_state: QueryState
+        destination: QueryT.Destination | null
         criterions: Criterions
         map_center: LatLngTuple
         results: QueryT.Result[] | null
@@ -13,6 +14,7 @@ declare namespace AppData {
 
     type QueryState = "picker" | "querying" | "result" | "error" ;
     type Criterions = Dictionary<QueryT.CriterionAny | null>;
+    
 }
 
 export default AppData;

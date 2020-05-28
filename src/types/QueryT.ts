@@ -4,10 +4,10 @@ namespace QueryT {
 
     export interface Distance {
         value: number
-        type?: DistanceType
+        type: DistanceType
     }
 
-    export type KnownObjectTypes = "lat_lng" |
+    export type KnownObjectTypes = "lng_lat" |
         "tree" | //naturals
         "hotel" | //tourism
         "zoo" | //tourism
@@ -37,9 +37,13 @@ namespace QueryT {
     }
 
     export interface CriterionLatLng extends CriterionBase {
-        type: "lat_lng",
+        type: "lng_lat",
         lat: number
         lng: number
+    }
+
+    export interface Destination {
+        type: Exclude<KnownObjectTypes, "lng_lat">
     }
 
     export type CriterionAny = CriterionLatLng | CriterionPoint;
@@ -52,9 +56,8 @@ namespace QueryT {
     }
 
     export interface Result {
-        name: string
-        x: number
-        y: number
+        osm_row: OsmRowReference
+
     }
 }
 

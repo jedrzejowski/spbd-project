@@ -12,8 +12,10 @@ interface QueryResult<T = any> {
 const pool = new pg.Pool({
     user: "postgres",
     host: "localhost",
-    password: "haslo",
-    database: "postgis_30_sample",
+    // password: "haslo",
+    // database: "postgis_30_sample",
+    password: "spbd",
+    database: "spbd",
     port: 5432
 });
 

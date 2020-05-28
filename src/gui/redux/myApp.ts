@@ -3,6 +3,7 @@ import {Action, Actions} from "./actions";
 
 const initial_state: AppData.State = {
     query_state: "picker",
+    destination: null,
     criterions: {},
     map_center: [52.230032086031315, 21.01194262504578],
     results: null
@@ -58,12 +59,21 @@ export default function myApp<T extends keyof Actions>(
             }
         }
 
-        case "RESULTS_SET":{
+        case "RESULTS_SET": {
             const results = action.data as Actions["RESULTS_SET"];
 
             return {
                 ...state,
                 results
+            }
+        }
+
+        case "DESTINATION_SET": {
+            const destination = action.data as Actions["DESTINATION_SET"];
+
+            return {
+                ...state,
+                destination
             }
         }
 
