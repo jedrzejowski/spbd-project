@@ -4,6 +4,7 @@ import {LatLngTuple} from "leaflet";
 import useAppSelector from "./hooks/useAppSelector";
 import QueryT from "../types/QueryT";
 import useAppDispatch from "./hooks/useAppDispatch";
+import type GeoJson from "geojson";
 
 
 export default function MyMap() {
@@ -94,13 +95,20 @@ function ResultAssets(props: {
 }) {
     const {result} = props;
 
-    const position = [result.y, result.x] as LatLngTuple;
+    switch (result.geo_json.type) {
+        case "Point": {
+            const point = result.geo_json as GeoJson.Point;
+            const [longitude, latitude] = point.coordinates;
 
-    return <>
-        <Marker
-            position={position}
-        >
-            <Popup>{result.name}</Popup>
-        </Marker>
-    </>
+            return <>
+                <Marker position={[latitude, longitude] as LatLngTuple}>
+                    <Popup>{result.name}</Popup>
+                </Marker>
+            </>
+        }
+
+        default:
+            return <></>
+    }
 }
+

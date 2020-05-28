@@ -6,7 +6,6 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import spbd_algorithm from "../spbd_algorithm";
 import useAppDispatch from "../hooks/useAppDispatch";
-import QueryT from "../../types/QueryT";
 import notNullOrUndef from "../lib/notNullOrUndef";
 
 const useClasses = makeStyles(theme => ({

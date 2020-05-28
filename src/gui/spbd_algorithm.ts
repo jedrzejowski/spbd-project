@@ -27,7 +27,7 @@ export default async function spbd_algorithm(args: {
     first_where.push(destination_predicate.where);
 
     first_select.push(`distinct on (${dest_alias}.osm_id) ${dest_alias}.osm_id as "osm_id"`);
-    first_select.push(`ST_asText(${dest_alias}.way) as "way_txt"`);
+    first_select.push(`ST_AsGeoJSON(${dest_alias}.way_4326) as "geo_json"`);
     first_select.push(`${dest_alias}.name as "name"`);
     first_select.push(`row_to_json(${dest_alias})   as "json"`)
 
@@ -80,11 +80,15 @@ export default async function spbd_algorithm(args: {
 
     console.log(query);
 
-    let resp = await queryDatabase(query, []);
+    let resp = await queryDatabase<QueryT.Result>(query);
 
     console.log(resp);
 
-    return [];
+    return resp.rows.map(row => {
+        // z jakiegoś powodu baza zwraca tekst
+        row.geo_json = JSON.parse(row.geo_json + "");
+        return row;
+    });
 }
 
 

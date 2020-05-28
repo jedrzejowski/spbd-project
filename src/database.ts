@@ -34,6 +34,6 @@ pool.on("error", (error) => {
 });
 
 
-export function queryDatabase<T = any>(query: string, params: any[]): Promise<QueryResult<T>> {
+export function queryDatabase<T = any>(query: string, params: any[] = []): Promise<QueryResult<T>> {
     return pool.query(query, params);
 }

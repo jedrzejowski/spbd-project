@@ -1,3 +1,5 @@
+import type {GeoJsonObject} from "geojson";
+
 namespace QueryT {
 
     export type DistanceType = "straight_line" | "car_distance" | "car_time";
@@ -52,12 +54,14 @@ namespace QueryT {
         osm_id: bigint,
         table: "polygon" | "point" | "line",
         name: string
-        way_txt: string
+        way_txt: any
     }
 
     export interface Result {
-        osm_row: OsmRowReference
-
+        osm_id: bigint
+        name: string
+        osm_row: any
+        geo_json: GeoJsonObject
     }
 }
 
