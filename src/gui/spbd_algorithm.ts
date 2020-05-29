@@ -1,7 +1,8 @@
 import type QueryT from "../types/QueryT";
-import {queryDatabase} from "../database";
+import {createDbConnection} from "../database";
 import * as SQL from "./lib/sqlHelpers";
 import isLngLatCriterion from "./lib/isLngLatCriterion";
+import pg from "pg";
 
 function wait(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -10,111 +11,126 @@ function wait(ms: number) {
 // https://www.motofakty.pl/artykul/sprawdz-z-jaka-srednia-predkoscia-jezdzi-sie-po-polsce.html
 const max_velocity = 30 * (1000 / (60 * 60)) * (/*offset*/1.1);
 
-export default async function spbd_algorithm(args: {
+interface AlgorithmParams {
     destination: QueryT.Destination
     criterions: QueryT.CriterionAny[]
+}
+
+export default async function (args: AlgorithmParams) {
+    console.log(args);
+    let client;
+
+    try {
+        client = await createDbConnection();
+
+        return await algorithm({
+            ...args,
+            client
+        })
+    } catch (e) {
+        client?.release();
+        throw e;
+    }
+}
+
+async function algorithm(args: AlgorithmParams & {
+    client: pg.PoolClient
 }): Promise<QueryT.Result[]> {
-    const {criterions, destination} = args;
-    console.log(criterions, destination);
+    const {criterions, destination, client} = args;
 
-    const first_select: string[] = [], first_from: string[] = [], first_where: string[] = [];
-    const second_select: string[] = [], second_from: string[] = [], second_where: string[] = [];
+    let select_base: string[] = [];
+    let last_query = "";
+    let group_by: string[] = [];
 
-
-    const destination_predicate = predicateObjectType(destination.type);
-    const dest_alias = destination_predicate.alias;
-    first_from.push(destination_predicate.from);
-    first_where.push(destination_predicate.where);
-
-    first_select.push(`distinct on (${dest_alias}.osm_id) ${dest_alias}.osm_id as "osm_id"`);
-    first_select.push(`ST_AsGeoJSON(${dest_alias}.way_4326) as "geo_json"`);
-    first_select.push(`${dest_alias}.name as "name"`);
-    first_select.push(`row_to_json(${dest_alias})   as "json"`)
-
+    select_base.push(`object1.osm_id as "osm_id"`);
+    select_base.push(`object1.way as "way"`);
+    group_by.push(`object1.osm_id`);
+    group_by.push(`object1.way`);
+    last_query = `
+        select ${select_base.join(', ')}
+        from planet_osm_typed object1
+        where object1.type = '${destination.type}'
+    `;
 
     for (let criterion of criterions) {
-        let way_alias: string;
 
-        if (isLngLatCriterion(criterion)) {
-            way_alias = SQL.planetPoint(criterion.lng, criterion.lat);
-        } else {
-            const criterion_predicate = predicateObjectType(criterion.type);
-            way_alias = criterion_predicate.alias + ".way_4326";
+        function myDistance(from: string, to: string) {
 
-            first_from.push(criterion_predicate.from);
-            first_where.push(criterion_predicate.where);
+            switch (criterion.distance.type) {
+                case "straight_line": {
+                    return SQL.planetDistance(from, to) + ' < ' + criterion.distance.value
+                }
 
-            // aby wkluczyć porównywania tych samych wierszy
-            first_where.push(`${dest_alias}.osm_id != ${criterion_predicate.alias}.osm_id`);
+                case "car_distance": {
+                    // odległość w samochodzie zawszę będzie mniejsza niż linii prostej
+                    return SQL.planetDistance(from, to) + ' < ' + criterion.distance.value
+                }
 
+                case "car_time": {
+                    return SQL.planetDistance(from, to) +
+                        ' < ' + criterion.distance.value / max_velocity
+                }
+
+                default:
+                    throw new Error();
+            }
         }
 
-        switch (criterion.distance.type) {
-            case "car_distance": // odległość w samochodzie zawszę będzie mniejsza niż linii prostej
-            case "straight_line": {
-                first_where.push(
-                    SQL.planetDistance(way_alias, `${dest_alias}.way_4326`) + ' < ' + criterion.distance.value
-                );
-                break;
-            }
+        const my_alias = SQL.genName();
 
-            case "car_time": {
-                first_where.push(
-                    SQL.planetDistance(way_alias, `${dest_alias}.way_4326`) +
-                    ' < ' + criterion.distance.value / max_velocity
-                );
-                break;
-            }
+        if (isLngLatCriterion(criterion)) {
 
-            default:
-                throw new Error();
+            last_query = `
+            select object1.*
+            from (${last_query}) object1
+            where ${myDistance('object1.way', SQL.planetPoint(criterion.lng, criterion.lat))}
+            `;
+
+        } else {
+
+            last_query = `
+            select ${select_base.join(', ')}, array_agg(object2.osm_id) as "${my_alias}"
+            from (${last_query}) object1,
+                  planet_osm_typed object2
+            where (object1.osm_id != object2.osm_id)
+                and object2.type = '${criterion.type}'
+                and ${myDistance('object1.way', 'object2.way')}
+            group by ${group_by.join(', ')}
+            `;
+
+            select_base.push(`object1.${my_alias} as "${my_alias}"`);
+            group_by.push(`object1.${my_alias}`);
         }
     }
 
+    let query = `
+begin;
 
-    let query = SQL.createSelect({
-        select: first_select,
-        from: first_from,
-        where: SQL.and(first_where)
-    });
+    drop table if exists my_points;
+    create temp table my_points as
+    ${last_query};
+    
+    if ${false} then
+    
+    select * from my_points;
+    
+    end if;
+    
+    select * from my_points;
+       
+commit;
+    `
 
     console.log(query);
 
-    let resp = await queryDatabase<QueryT.Result>(query);
+    // @ts-ignore
+    let resp = await client.query(query) as pg.QueryResult<>[];
 
     console.log(resp);
 
-    return resp.rows.map(row => {
+    return resp[3].rows.map(row => {
         // z jakiegoś powodu baza zwraca tekst
         row.geo_json = JSON.parse(row.geo_json + "");
         return row;
     });
-}
-
-
-interface Predicate {
-    from: string
-    alias: string
-    table: string
-    where: string
-}
-
-function predicateObjectType(
-    object_type: QueryT.KnownObjectTypes,
-): Predicate {
-    const alias = SQL.genName();
-
-    switch (object_type) {
-        case "hotel": {
-            return {
-                alias,
-                table: "planet_osm_point",
-                from: `planet_osm_point ${alias}`,
-                where: `${alias}.tourism = 'hotel'`
-            }
-        }
-
-        default:
-            throw new Error(`predicateObjectType(): nie obsługiwany typ: ${object_type}`);
-    }
 }
