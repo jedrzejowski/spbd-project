@@ -41,10 +41,6 @@ export default function CriterionObjects() {
     const dispatch = useAppDispatch();
     const criterions = useAppSelector(state => state.criterions);
 
-    useEffect(() => {
-        // onChange?.(criterions);
-    }, [criterions]);
-
     function handleAddCriterion() {
         dispatch("CRITERION_SET", {criterion_id: (++dynamic_id) + "", criterion: null});
     }

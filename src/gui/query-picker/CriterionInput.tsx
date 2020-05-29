@@ -92,11 +92,11 @@ export default function CriterionInput(props: {
 
             <KnownObjectTypeInput value={object_type} onChange={type => setObjectType(type)}/>
 
-            <div style={{
-                display: display_rowsearch ? undefined : "none",
-            }}>
-                <SearchOsmRow type={object_type} onChange={osm_ref => setOsmRow(osm_ref)}/>
-            </div>
+            {/*<div style={{*/}
+            {/*    display: display_rowsearch ? undefined : "none",*/}
+            {/*}}>*/}
+            {/*    <SearchOsmRow type={object_type} onChange={osm_ref => setOsmRow(osm_ref)}/>*/}
+            {/*</div>*/}
 
             <TextField
                 label="Szerokość"

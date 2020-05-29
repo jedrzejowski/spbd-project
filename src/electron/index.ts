@@ -1,5 +1,6 @@
 import {app, BrowserWindow} from 'electron'
 
+
 let mainWindow: Electron.BrowserWindow
 
 function onReady() {

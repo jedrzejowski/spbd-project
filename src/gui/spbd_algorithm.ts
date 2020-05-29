@@ -79,8 +79,11 @@ async function algorithm(args: AlgorithmParams & {
 
     select_base.push(`inner_one.osm_id as "osm_id"`);
     select_base.push(`inner_one.way as "way"`);
+    select_base.push(`inner_one.name as "name"`);
     group_by.push(`inner_one.osm_id`);
     group_by.push(`inner_one.way`);
+    group_by.push(`inner_one.name`);
+
     last_query = `
         select ${select_base.join(', ')}
         from planet_osm_typed inner_one
@@ -113,6 +116,7 @@ async function algorithm(args: AlgorithmParams & {
             select ${select_base.join(', ')}, 
                    array_agg(outer_one.osm_id) as "${my_alias}_osm_id",
                    array_agg(outer_one.way) as "${my_alias}_way",
+                   array_agg(outer_one.name) as "${my_alias}_name",
                    array_agg(${SQL.planetDistance('inner_one.way', 'outer_one.way')}) as "${my_alias}_distance"
             from (${last_query}) inner_one,
                   planet_osm_typed outer_one
@@ -124,6 +128,8 @@ async function algorithm(args: AlgorithmParams & {
 
             select_base.push(`inner_one.${my_alias}_osm_id as "${my_alias}_osm_id"`);
             group_by.push(`inner_one.${my_alias}_osm_id`);
+            select_base.push(`inner_one.${my_alias}_name as "${my_alias}_name"`);
+            group_by.push(`inner_one.${my_alias}_name`);
         }
 
         select_base.push(`inner_one.${my_alias}_way as "${my_alias}_way"`);
@@ -161,11 +167,11 @@ begin;
     ${last_query};
     
     create temp table my_points_with_verts as
-    select point.*,
-           spbd_find_pgr_vert_car(point.way)    as "vert_id"
+    select point.*
+           ${find_verts_for_alias.length > 0 ? `,spbd_find_pgr_vert_car(point.way)    as "vert_id"` : ""}
            ${find_verts_for_alias.map(alias => {
         return `,(select array_agg(spbd_find_pgr_vert_car(way))
-                 from unnest(point.${alias}_way) way) as "${alias}_vert_id"`
+                         from unnest(point.${alias}_way) way) as "${alias}_vert_id"`
     }).join('')}
     from my_points point;
     
@@ -176,8 +182,9 @@ begin;
                select json_agg(to_json(astar))
                from (
                    select astar.start_vert as "vert_id",
-                       ${options.has_osm_id ? `point.${options.alias}_osm_id[array_position(point.${options.alias}_vert_id, astar.start_vert)] as "osm_id",` : ""}
                        point.${options.alias}_way[array_position(point.${options.alias}_vert_id, astar.start_vert)] as "way",
+                       ${options.has_osm_id ? `point.${options.alias}_osm_id[array_position(point.${options.alias}_vert_id, astar.start_vert)] as "osm_id",` : ""}
+                       ${options.has_osm_id ? `point.${options.alias}_name[array_position(point.${options.alias}_vert_id, astar.start_vert)] as "name",` : ""}
                        astar.sum,
                        ( -- zamiana [index, node][] na [lng,lat][]
                         select json_agg(pos.lon_lat)
@@ -203,27 +210,29 @@ begin;
     from my_points_with_verts point;
     
     select point.osm_id,
-       to_json(point.way),
+       to_json(point.way) as "way",
+       point.name,
        json_build_array(${
         sumarize.map(options => {
             switch (options.type) {
                 case "straight_line": {
-                    return `(
-                        select json_agg(to_json(v))
-                        from (
-                            select point.${options.alias}_way[i]
-                                  ,point.${options.alias}_distance[i]
-                                  ${options.has_osm_id ? `,point.${options.alias}_osm_id[i]` : ""}
-                            from generate_subscripts(point.${options.alias}_way, 1) i
-                            ) v
-                     )`
+                    return `select json_build_object('type', 'straight_line', 'matches', json_agg(to_json(v)))
+                            from (
+                                select point.${options.alias}_way[i] as "way"
+                                      ,point.${options.alias}_distance[i] as "distance"
+                                      ${options.has_osm_id ? `,point.${options.alias}_osm_id[i] as "osm_id"` : ""}
+                                      ${options.has_osm_id ? `,point.${options.alias}_name[i] as "name"` : ""}
+                                from generate_subscripts(point.${options.alias}_way, 1) i
+                                ) v`
                 }
-                case "car_time":
-                case "car_distance":{
-                    return `${options.alias}_astar`
+                case "car_time": {
+                    return `select json_build_object('type', 'car_time', 'matches', ${options.alias}_astar)`
+                }
+                case "car_distance": {
+                    return `select json_build_object('type', 'car_distance', 'matches', ${options.alias}_astar)`
                 }
             }
-        })
+        }).map(SQL.brackets)
     }) as "criterions"
     from my_points_astar point;
 
@@ -238,9 +247,5 @@ commit;
 
     console.log(resp);
 
-    return resp[7].rows.map(row => {
-        // z jakiegoś powodu baza zwraca tekst
-        row.geo_json = JSON.parse(row.geo_json + "");
-        return row;
-    });
+    return resp[7].rows;
 }

@@ -1,4 +1,4 @@
-import type {GeoJsonObject} from "geojson";
+import type GeoJSON from "geojson";
 
 namespace QueryT {
 
@@ -58,11 +58,36 @@ namespace QueryT {
     }
 
     export interface Result {
+        name: string | null
         osm_id: bigint
-        name: string
-        osm_row: any
-        geo_json: GeoJsonObject
+        way: GeoJSON.GeoJSON
+        criterions: CriterionResult[]
     }
+
+    type CriterionResult = {
+        type: "straight_line"
+        matches: CriterionLineMatch[]
+    } | {
+        type: "car_distance" | "car_time"
+        matches: CriterionAstarMatch[]
+    }
+
+    interface CriterionLineMatch {
+        distance: number
+        name?: string
+        osm_id?: number
+        way: GeoJSON.GeoJsonObject
+    }
+
+    interface CriterionAstarMatch {
+        nodes: [number, number][]
+        sum: number
+        vert_id: number
+        way: GeoJSON.GeoJsonObject
+        name?: string
+        osm_id?: number
+    }
+
 }
 
 export default QueryT;

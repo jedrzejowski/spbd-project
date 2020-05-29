@@ -6,7 +6,8 @@ const initial_state: AppData.State = {
     destination: null,
     criterions: {},
     map_center: [52.230032086031315, 21.01194262504578],
-    results: null
+    results: null,
+    result_expanded_index: -1
 };
 
 export default function myApp<T extends keyof Actions>(
@@ -74,6 +75,15 @@ export default function myApp<T extends keyof Actions>(
             return {
                 ...state,
                 destination
+            }
+        }
+
+        case "RESULT_EXPANDED_INDEX_SET":{
+            const result_expanded_index = action.data as Actions["RESULT_EXPANDED_INDEX_SET"];
+
+            return {
+                ...state,
+                result_expanded_index
             }
         }
 

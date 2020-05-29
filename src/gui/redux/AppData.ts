@@ -10,11 +10,12 @@ declare namespace AppData {
         criterions: Criterions
         map_center: LatLngTuple
         results: QueryT.Result[] | null
+        result_expanded_index: number
     }
 
     type QueryState = "picker" | "querying" | "result" | "error" ;
     type Criterions = Dictionary<QueryT.CriterionAny | null>;
-    
+
 }
 
 export default AppData;

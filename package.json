@@ -37,6 +37,7 @@
         "@material-ui/icons": "^4.9.1",
         "@material-ui/lab": "^4.0.0-alpha.54",
         "@types/react-leaflet": "^2.5.1",
+        "clsx": "^1.1.0",
         "css-loader": "^3.5.3",
         "file-loader": "^6.0.0",
         "inquirer": "^7.1.0",

@@ -9,6 +9,7 @@ export interface Actions {
     MAP_CENTER_SET: LatLngTuple
     QUERY_STATE_SET: AppData.QueryState
     RESULTS_SET: QueryT.Result[] | null
+    RESULT_EXPANDED_INDEX_SET: number
 }
 
 export interface Action<T extends keyof Actions = any> {

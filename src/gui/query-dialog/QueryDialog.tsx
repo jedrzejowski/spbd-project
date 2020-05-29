@@ -42,6 +42,7 @@ export default function QueryDialog() {
                 destination: app_state.destination,
                 criterions
             }).then(results => {
+                dispatch("RESULT_EXPANDED_INDEX_SET", -1);
                 dispatch("RESULTS_SET", results);
                 dispatch("QUERY_STATE_SET", "result");
             }).catch(error => {
