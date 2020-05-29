@@ -33,6 +33,27 @@ export default async function (args: AlgorithmParams) {
     }
 }
 
+const vert_graph_car_query_by_length = `
+select gid::int4            as id,
+       source::int4,
+       target::int4,
+       cost::float8         as cost,
+       reverse_cost::float8 as reverse_cost,
+       x1, y1, x2, y2
+from ways_cars
+`;
+
+const vert_graph_car_query_by_time = `
+select gid::int4              as id,
+       source::int4,
+       target::int4,
+       cost_s::float8         as cost,
+       reverse_cost_s::float8 as reverse_cost,
+       x1, y1, x2, y2
+from ways_cars
+`;
+
+
 async function algorithm(args: AlgorithmParams & {
     client: pg.PoolClient
 }): Promise<QueryT.Result[]> {
@@ -42,81 +63,170 @@ async function algorithm(args: AlgorithmParams & {
     let last_query = "";
     let group_by: string[] = [];
 
-    select_base.push(`object1.osm_id as "osm_id"`);
-    select_base.push(`object1.way as "way"`);
-    group_by.push(`object1.osm_id`);
-    group_by.push(`object1.way`);
+    let find_verts_for_alias: string[] = [];
+    let preform_astar: {
+        has_osm_id: boolean
+        alias: string
+        by: "length" | "time",
+        distance: number
+    }[] = [];
+    let sumarize: {
+        alias: string
+        has_osm_id: boolean
+        type: QueryT.DistanceType
+    }[] = [];
+
+
+    select_base.push(`inner_one.osm_id as "osm_id"`);
+    select_base.push(`inner_one.way as "way"`);
+    group_by.push(`inner_one.osm_id`);
+    group_by.push(`inner_one.way`);
     last_query = `
         select ${select_base.join(', ')}
-        from planet_osm_typed object1
-        where object1.type = '${destination.type}'
+        from planet_osm_typed inner_one
+        where inner_one."type" = '${destination.type}'
     `;
 
     for (let criterion of criterions) {
 
-        function myDistance(from: string, to: string) {
-
-            switch (criterion.distance.type) {
-                case "straight_line": {
-                    return SQL.planetDistance(from, to) + ' < ' + criterion.distance.value
-                }
-
-                case "car_distance": {
-                    // odległość w samochodzie zawszę będzie mniejsza niż linii prostej
-                    return SQL.planetDistance(from, to) + ' < ' + criterion.distance.value
-                }
-
-                case "car_time": {
-                    return SQL.planetDistance(from, to) +
-                        ' < ' + criterion.distance.value / max_velocity
-                }
-
-                default:
-                    throw new Error();
-            }
-        }
-
         const my_alias = SQL.genName();
 
+        let max_distance = criterion.distance.value;
+        if (criterion.distance.type === "car_time") {
+            max_distance = criterion.distance.value / max_velocity
+        }
+
         if (isLngLatCriterion(criterion)) {
+            const ll_point = SQL.planetPoint(criterion.lng, criterion.lat);
 
             last_query = `
-            select object1.*
-            from (${last_query}) object1
-            where ${myDistance('object1.way', SQL.planetPoint(criterion.lng, criterion.lat))}
+            select inner_one.*, 
+                   array[${ll_point}] as "${my_alias}_way",
+                   array[${SQL.planetDistance('inner_one.way', ll_point)}] as "${my_alias}_distance"
+            from (${last_query}) inner_one
+            where ${SQL.planetDistance('inner_one.way', ll_point)} < ${max_distance}
             `;
 
         } else {
 
             last_query = `
-            select ${select_base.join(', ')}, array_agg(object2.osm_id) as "${my_alias}"
-            from (${last_query}) object1,
-                  planet_osm_typed object2
-            where (object1.osm_id != object2.osm_id)
-                and object2.type = '${criterion.type}'
-                and ${myDistance('object1.way', 'object2.way')}
+            select ${select_base.join(', ')}, 
+                   array_agg(outer_one.osm_id) as "${my_alias}_osm_id",
+                   array_agg(outer_one.way) as "${my_alias}_way",
+                   array_agg(${SQL.planetDistance('inner_one.way', 'outer_one.way')}) as "${my_alias}_distance"
+            from (${last_query}) inner_one,
+                  planet_osm_typed outer_one
+            where (inner_one.osm_id != outer_one.osm_id)
+                and outer_one.type = '${criterion.type}'
+                and ${SQL.planetDistance('inner_one.way', 'outer_one.way')} < ${max_distance}
             group by ${group_by.join(', ')}
             `;
 
-            select_base.push(`object1.${my_alias} as "${my_alias}"`);
-            group_by.push(`object1.${my_alias}`);
+            select_base.push(`inner_one.${my_alias}_osm_id as "${my_alias}_osm_id"`);
+            group_by.push(`inner_one.${my_alias}_osm_id`);
         }
+
+        select_base.push(`inner_one.${my_alias}_way as "${my_alias}_way"`);
+        group_by.push(`inner_one.${my_alias}_way`);
+        select_base.push(`inner_one.${my_alias}_distance as "${my_alias}_distance"`);
+        group_by.push(`inner_one.${my_alias}_distance`);
+
+        if ((criterion.distance.type === "car_distance") ||
+            (criterion.distance.type === "car_time")) {
+            find_verts_for_alias.push(my_alias);
+
+            preform_astar.push({
+                has_osm_id: !isLngLatCriterion(criterion),
+                alias: my_alias,
+                by: criterion.distance.type === "car_distance" ? "length" : "time",
+                distance: criterion.distance.value
+            });
+
+        }
+
+        sumarize.push({
+            has_osm_id: !isLngLatCriterion(criterion),
+            alias: my_alias,
+            type: criterion.distance.type
+        });
     }
 
     let query = `
 begin;
-
+    drop table if exists my_points_astar;
+    drop table if exists my_points_with_verts;
     drop table if exists my_points;
+
     create temp table my_points as
     ${last_query};
     
-    if ${false} then
+    create temp table my_points_with_verts as
+    select point.*,
+           spbd_find_pgr_vert_car(point.way)    as "vert_id"
+           ${find_verts_for_alias.map(alias => {
+        return `,(select array_agg(spbd_find_pgr_vert_car(way))
+                 from unnest(point.${alias}_way) way) as "${alias}_vert_id"`
+    }).join('')}
+    from my_points point;
     
-    select * from my_points;
+    create temp table my_points_astar as
+    select point.*
+            ${preform_astar.map(options => {
+        return `,(
+               select json_agg(to_json(astar))
+               from (
+                   select astar.start_vert as "vert_id",
+                       ${options.has_osm_id ? `point.${options.alias}_osm_id[array_position(point.${options.alias}_vert_id, astar.start_vert)] as "osm_id",` : ""}
+                       point.${options.alias}_way[array_position(point.${options.alias}_vert_id, astar.start_vert)] as "way",
+                       astar.sum,
+                       ( -- zamiana [index, node][] na [lng,lat][]
+                        select json_agg(pos.lon_lat)
+                        from (select to_json(array [vert.lon, vert.lat]) as lon_lat
+                              from spbd_unnest_2d_table(astar.nodes) nodes,
+                                   ways_vertices_pgr_cars vert
+                              where nodes.second = vert.id
+                              order by nodes.first) pos
+                        ) as "nodes"
+                   from (
+                       select astar.start_vid                               as "start_vert",
+                           sum(astar.cost)                               as "sum",
+                           array_agg(array [astar.path_seq, astar.node]) as "nodes"
+                       from pgr_astar(
+                           '${options.by === "length" ? vert_graph_car_query_by_length : vert_graph_car_query_by_time}',
+                           point.${options.alias}_vert_id, point.vert_id, true) astar
+                        group by astar.start_vid
+                   ) astar
+               ) astar
+               where astar.sum < ${options.distance}
+           ) as "${options.alias}_astar"`
+    }).join('')}
+    from my_points_with_verts point;
     
-    end if;
-    
-    select * from my_points;
+    select point.osm_id,
+       to_json(point.way),
+       json_build_array(${
+        sumarize.map(options => {
+            switch (options.type) {
+                case "straight_line": {
+                    return `(
+                        select json_agg(to_json(v))
+                        from (
+                            select point.${options.alias}_way[i]
+                                  ,point.${options.alias}_distance[i]
+                                  ${options.has_osm_id ? `,point.${options.alias}_osm_id[i]` : ""}
+                            from generate_subscripts(point.${options.alias}_way, 1) i
+                            ) v
+                     )`
+                }
+                case "car_time":
+                case "car_distance":{
+                    return `${options.alias}_astar`
+                }
+            }
+        })
+    }) as "criterions"
+    from my_points_astar point;
+
        
 commit;
     `
@@ -128,7 +238,7 @@ commit;
 
     console.log(resp);
 
-    return resp[3].rows.map(row => {
+    return resp[7].rows.map(row => {
         // z jakiegoś powodu baza zwraca tekst
         row.geo_json = JSON.parse(row.geo_json + "");
         return row;

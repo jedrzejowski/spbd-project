@@ -16,18 +16,30 @@ alter table planet_osm_line
 update planet_osm_line
 set way_4326 = st_transform(way, 4326);
 
-drop table if exists ways_cars;
-create table ways_cars as
+---
+
+drop materialized view if exists ways_cars;
+
+create materialized view ways_cars as
 select *
 from ways
-where tag_id in (101, 103, 102, 117, 106, 107, 110, 100, 108, 124, 112, 115, 109, 125, 104, 105, 123)
+where tag_id in (101, 103, 102, 117, 106, 107, 110, 100, 108, 124, 112, 115, 109, 125, 104, 105, 123);
 
-drop table if exists ways_vertices_pgr_cars;
-create table ways_vertices_pgr_cars as
+refresh materialized view ways_cars;
+
+---
+
+drop materialized view if exists ways_vertices_pgr_cars;
+
+create materialized view ways_vertices_pgr_cars as
 select distinct on (vert.id) vert.*
 from ways_vertices_pgr vert,
      ways_cars edge
 where (edge.source = vert.id or edge.target = vert.id);
+
+refresh materialized view ways_vertices_pgr_cars;
+
+---
 
 create or replace function spbd_find_pgr_vert_car(way_point geometry(Point, 4326)) returns bigint as
 $$
@@ -38,9 +50,32 @@ order by ST_Distance(vert.the_geom, way_point)
 limit 1;
 $$ language sql;
 
+---
 
-drop table if exists planet_osm_typed;
-create table planet_osm_typed as
+-- https://stackoverflow.com/questions/8137112/unnest-array-by-one-level
+create or replace function spbd_unnest_2d_table(bigint[][])
+    returns table
+            (
+                "first"  bigint,
+                "second" bigint
+            )
+as
+$$
+select q.a[1] as "first", q.a[2] as "second"
+from (select array_agg($1[d1][d2]) as "a"
+      from generate_subscripts($1, 1) d1
+         , generate_subscripts($1, 2) d2
+      group by d1
+      order by d1
+     ) q;
+
+$$ language sql immutable;
+
+---
+
+drop view if exists planet_osm_typed;
+
+create materialized view planet_osm_typed as
 select p.osm_id,
        'tree'     as "type",
        p.way_4326 as "way",
@@ -66,4 +101,4 @@ where p.tourism = 'hotel'
 -- where p.building notnull
 ;
 
-
+refresh materialized view planet_osm_typed;
