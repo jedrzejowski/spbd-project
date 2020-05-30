@@ -9,7 +9,7 @@ function wait(ms: number) {
 }
 
 // https://www.motofakty.pl/artykul/sprawdz-z-jaka-srednia-predkoscia-jezdzi-sie-po-polsce.html
-const max_velocity = 30 * (1000 / (60 * 60)) * (/*offset*/1.1);
+const max_velocity = 28;
 
 interface AlgorithmParams {
     destination: QueryT.Destination
@@ -96,7 +96,7 @@ async function algorithm(args: AlgorithmParams & {
 
         let max_distance = criterion.distance.value;
         if (criterion.distance.type === "car_time") {
-            max_distance = criterion.distance.value / max_velocity
+            max_distance = max_velocity * criterion.distance.value;
         }
 
         if (isLngLatCriterion(criterion)) {

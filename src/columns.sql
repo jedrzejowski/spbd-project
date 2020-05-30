@@ -41,11 +41,11 @@ refresh materialized view ways_vertices_pgr_cars;
 
 ---
 
-create or replace function spbd_find_pgr_vert_car(way_point geometry(Point, 4326)) returns bigint as
+create or replace function spbd_find_pgr_vert_car(way_point geometry) returns bigint as
 $$
 select vert.id
 from ways_vertices_pgr_cars vert
-where the_geom && st_expand(way_point, 0.001)
+-- where the_geom && st_expand(way_point, 0.001)
 order by ST_Distance(vert.the_geom, way_point)
 limit 1;
 $$ language sql;
