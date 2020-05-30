@@ -234,7 +234,8 @@ begin;
             }
         }).map(SQL.brackets)
     }) as "criterions"
-    from my_points_astar point;
+    from my_points_astar point
+    where ${preform_astar.length > 0 ? SQL.and(preform_astar.map(options => `${options.alias}_astar notnull`)) : true};
 
        
 commit;

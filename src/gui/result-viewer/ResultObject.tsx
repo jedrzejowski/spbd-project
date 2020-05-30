@@ -11,6 +11,7 @@ import type QueryT from "../../types/QueryT";
 import useAppSelector from "../hooks/useAppSelector";
 import useAppDispatch from "../hooks/useAppDispatch";
 import {Typography} from "@material-ui/core";
+import geometryToString from "../lib/geometryToString";
 
 const useClasses = makeStyles(theme => ({
     expand: {
@@ -57,15 +58,69 @@ export default function ResultObject(props: {
 
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <CardContent>
-                    <Typography variant="subtitle1" gutterBottom>
-                        Kryteria:
-                    </Typography>
+                    {result.criterions.map((criterion, index) => {
+                        return <React.Fragment key={index}>
+                            <Typography variant="subtitle2" gutterBottom>
+                                Kryterium #{index + 1}
+                            </Typography>
 
-                    {result.criterions.map(criterion=>{
+                            {criterion.type === "straight_line" ? criterion.matches.map((match, i) => {
+                                return <CriterionLineMatch key={i} match={match}/>
+                            }) : undefined}
 
+                            {criterion.type === "car_distance" ? criterion.matches?.map((match, i) => {
+                                return <CriterionAstarMatch key={i} match={match} unit="m"/>
+                            }) : undefined}
+
+                            {criterion.type === "car_time" ? criterion.matches?.map((match, i) => {
+                                return <CriterionAstarMatch key={i} match={match} unit="s"/>
+                            }) : undefined}
+
+                        </React.Fragment>
                     })}
                 </CardContent>
             </Collapse>
         </Card>
     </div>
+}
+
+function CriterionLineMatch(props: {
+    match: QueryT.CriterionLineMatch
+}) {
+    const {match} = props;
+    let text = [`w odległości ${match.distance.toFixed(2)} [m] od`];
+
+    if (match.name) {
+        text.push(match.name)
+    }
+
+    if (match.osm_id) {
+        text.push(`[OSM_ID ${match.osm_id}]`);
+    }
+
+    text.push(geometryToString(match.way));
+
+    return <Typography variant="body2" paragraph>
+        {text.join(' ')}.
+    </Typography>
+}
+
+function CriterionAstarMatch(props: {
+    match: QueryT.CriterionAstarMatch
+    unit: "s" | "m"
+}) {
+    const {match} = props;
+    let text = [`W odległości ${match.sum.toFixed(2)} [${props.unit}] od`];
+
+    if (match.name) {
+        text.push(match.name)
+    }
+
+    if (match.osm_id) {
+        text.push(`[OSM_ID ${match.osm_id}]`);
+    }
+
+    return <Typography variant="body2" paragraph>
+        {text.join(' ')}.
+    </Typography>
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import MyMap from "./MyMap";
+import MyMap from "./map/MyMap";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import QueryPiker from "./query-picker/QueryPiker";
 import useAppSelector from "./hooks/useAppSelector";

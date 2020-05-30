@@ -60,11 +60,11 @@ namespace QueryT {
     export interface Result {
         name: string | null
         osm_id: bigint
-        way: GeoJSON.GeoJSON
+        way: GeoJSON.Geometry
         criterions: CriterionResult[]
     }
 
-    type CriterionResult = {
+    export type CriterionResult = {
         type: "straight_line"
         matches: CriterionLineMatch[]
     } | {
@@ -72,18 +72,18 @@ namespace QueryT {
         matches: CriterionAstarMatch[]
     }
 
-    interface CriterionLineMatch {
+    export interface CriterionLineMatch {
         distance: number
         name?: string
         osm_id?: number
-        way: GeoJSON.GeoJsonObject
+        way: GeoJSON.Geometry
     }
 
-    interface CriterionAstarMatch {
+    export interface CriterionAstarMatch {
         nodes: [number, number][]
         sum: number
         vert_id: number
-        way: GeoJSON.GeoJsonObject
+        way: GeoJSON.Geometry
         name?: string
         osm_id?: number
     }
