@@ -27,6 +27,12 @@ export default function QueryDialog() {
     const query_state = useAppSelector(state => state.query_state);
     const app_state = useAppSelector(state => state);
 
+    function cancelTask(){
+        dispatch("RESULT_EXPANDED_INDEX_SET", -1);
+        dispatch("RESULTS_SET", null);
+        dispatch("QUERY_STATE_SET", "picker");
+    }
+
     useEffect(() => {
         if (query_state === "querying") {
             const criterions = Object.keys(app_state.criterions).map(criterion_id => {
@@ -34,7 +40,8 @@ export default function QueryDialog() {
             }).filter(notNullOrUndef);
 
             if (app_state.destination === null) {
-                console.error("to trzeba obsłużyć")
+                console.error("app_state.destination === null");
+                cancelTask();
                 return;
             }
 
@@ -46,7 +53,8 @@ export default function QueryDialog() {
                 dispatch("RESULTS_SET", results);
                 dispatch("QUERY_STATE_SET", "result");
             }).catch(error => {
-                console.log(error);
+                console.error(error);
+                cancelTask();
             });
         }
     }, [query_state])

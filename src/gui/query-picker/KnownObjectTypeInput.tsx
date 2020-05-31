@@ -11,7 +11,7 @@ interface OptionDef {
 const options: OptionDef[] = [{
     label: "Współrzędne",
     type: "lng_lat"
-},  {
+}, {
     label: "Apteka",
     type: "pharmacy"
 }, {
@@ -61,13 +61,14 @@ const options: OptionDef[] = [{
     type: "zoo"
 }];
 
+const options_without_lnglat = options.filter(option => option.type !== "lng_lat")
 
 export default function KnownObjectTypeInput(props: {
     value?: QueryT.KnownObjectTypes | null
     onChange?: (type: QueryT.KnownObjectTypes | null) => void,
-    lngLat?: boolean
+    showLngLat?: boolean
 }) {
-
+    const showLngLat = props.showLngLat ?? true;
     const default_value = options.find(option => option.type === props.value);
     const [option, setOption] = useState<OptionDef | null>(default_value ?? null);
 
@@ -82,7 +83,7 @@ export default function KnownObjectTypeInput(props: {
 
     return <Autocomplete
         defaultValue={default_value ?? undefined}
-        options={options}
+        options={showLngLat ? options : options_without_lnglat}
         getOptionLabel={(option) => option.label}
         onChange={(event: object, option: OptionDef | null) => handleChange(option)}
         renderInput={(params) => {

@@ -32,7 +32,11 @@ export default function DestinationInput() {
     return <div>
         <div className={classes.input_root}>
 
-            <KnownObjectTypeInput value={object_type} onChange={type => handleObjectTypeChange(type)}/>
+            <KnownObjectTypeInput
+                value={object_type}
+                onChange={type => handleObjectTypeChange(type)}
+                showLngLat={false}
+            />
 
         </div>
     </div>
