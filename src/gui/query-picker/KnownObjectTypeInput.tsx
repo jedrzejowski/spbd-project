@@ -11,12 +11,54 @@ interface OptionDef {
 const options: OptionDef[] = [{
     label: "Współrzędne",
     type: "lng_lat"
+},  {
+    label: "Apteka",
+    type: "pharmacy"
+}, {
+    label: "Bank",
+    type: "bank"
+}, {
+    label: "Bankomat",
+    type: "atm"
+}, {
+    label: "Biblioteka",
+    type: "library"
+}, {
+    label: "Drzewo",
+    type: "tree"
+}, {
+    label: "Hostel",
+    type: "hostel"
 }, {
     label: "Hotel",
     type: "hotel"
 }, {
-    label: "Drzewo",
-    type: "tree"
+    label: "Ławka",
+    type: "bench"
+}, {
+    label: "Motel",
+    type: "motel"
+}, {
+    label: "Muzeum",
+    type: "museum"
+}, {
+    label: "Piekarnia",
+    type: "bakery"
+}, {
+    label: "Poczta",
+    type: "post_office"
+}, {
+    label: "Restauracja fast food",
+    type: "fast_food"
+}, {
+    label: "Sklep z alkoholem",
+    type: "alcohol"
+}, {
+    label: "Supermarket",
+    type: "supermarket"
+}, {
+    label: "ZOO",
+    type: "zoo"
 }];
 
 

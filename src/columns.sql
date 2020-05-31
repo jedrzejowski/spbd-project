@@ -73,9 +73,10 @@ $$ language sql immutable;
 
 ---
 
-drop view if exists planet_osm_typed;
+drop materialized view if exists planet_osm_typed;
 
 create materialized view planet_osm_typed as
+
 select p.osm_id,
        'tree'     as "type",
        p.way_4326 as "way",
@@ -83,14 +84,31 @@ select p.osm_id,
 --        spbd_find_pgr_vert_car(p.way_4326) as "nearest_car_vert_id"
 from planet_osm_point p
 where p.natural = 'tree'
+
 union
 select p.osm_id,
-       'hotel'  as "type",
+       p.tourism  as "type",
        way_4326 as "way",
        p.name   as "name"
---        spbd_find_pgr_vert_car(p.way_4326) as "nearest_car_vert_id"
 from planet_osm_point p
-where p.tourism = 'hotel'
+where p.tourism in ('motel', 'hostel', 'museum', 'zoo', 'hotel')
+
+union
+select p.osm_id,
+       p.shop  as "type",
+       way_4326 as "way",
+       p.name   as "name"
+from planet_osm_point p
+where p.shop in ('bakery', 'alcohol', 'supermarket')
+
+union
+select p.osm_id,
+       p.amenity  as "type",
+       way_4326 as "way",
+       p.name   as "name"
+from planet_osm_point p
+where p.amenity in ('atm', 'fast_food', 'post_office', 'bank', 'pharmacy', 'library', 'bench')
+
 -- union
 -- select p.osm_id,
 --        'building'                    as "type",
