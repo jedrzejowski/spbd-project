@@ -4,9 +4,9 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "ts-node src/index.ts",
+        "build": "webpack --mode production",
         "dev-build": "webpack --mode development --watch",
-        "dev-start": "electron ./dist/main.js"
+        "electron": "electron ./dist/main.js"
     },
     "author": "",
     "license": "ISC",
